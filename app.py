@@ -275,10 +275,8 @@ def main():
     st.markdown("""
     ### A Quantitative Return Analysis Tool
     
-    Qorba (قربة) is a sophisticated return analysis tool designed to provide comprehensive performance analytics 
-    for investment managers. The name pays homage to the traditional Middle Eastern soup dish, reflecting the 
-    tool's ability to blend various performance metrics into a cohesive analytical "soup" - while also being 
-    a play on QoR (Quality of Returns) Analysis.
+    Qorba is a return analysis tool designed to provide a preliminary but comprehensive performance analytics 
+    for current and prospective managers. The analysis provided is not exhaustive, but it serves as a starting point for understanding the performance of a manager.
     
     ### Instructions
     1. Prepare your CSV file with monthly returns data:
