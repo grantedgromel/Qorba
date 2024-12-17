@@ -295,14 +295,12 @@ def main():
             # Load and validate data
             data = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
             
-            # ADD DIAGNOSTIC CODE HERE
-            st.write("DEBUG INFO:")
-            st.write("Data Index Sample (first 5 dates):")
-            st.write(data.index[:5])
-            st.write("Data Index Type:", type(data.index))
-            st.write("Number of rows:", len(data))
-            st.write("Column names:", data.columns.tolist())
-            # END DIAGNOSTIC CODE
+            # Add this debug info
+            st.write("Data before rolling calculation:")
+            st.write("Index:", data.index[:5])
+            st.write("Columns:", data.columns.tolist())
+            st.write("First few rows:")
+            st.write(data.head())
             
             # Display analysis date and benchmarks
             st.markdown(f"""
