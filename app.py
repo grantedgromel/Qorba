@@ -273,7 +273,7 @@ def main():
     
     st.title("Qorba")
     st.markdown("""
-    ### A Quantitative Return Analysis Tool
+    ### A Quality of Returns Analysis Tool
     
     Qorba is a return analysis tool designed to provide a preliminary but comprehensive performance analytics 
     for current and prospective managers. The analysis provided is not exhaustive, but it serves as a starting point for understanding the performance of a manager.
