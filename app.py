@@ -1,11 +1,3 @@
-# requirements.txt
-streamlit==1.29.0
-pandas==2.1.4
-numpy==1.24.3
-plotly==5.18.0
-scipy==1.11.4
-
-# app.py
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -127,12 +119,56 @@ def main():
     3. View the analysis results
     """)
     
+    # Add sample data format
+    st.markdown("""
+    **Sample Data Format:**
+    ```
+    Date,Fund1,Fund2,Benchmark
+    2023-01-31,0.02,-0.01,0.015
+    2023-02-28,0.03,0.02,0.01
+    2023-03-31,-0.01,0.04,0.02
+    ```
+    """)
+    
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     
     if uploaded_file is not None:
         try:
-            data = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
-            
+            # First verify the file can be read
+            try:
+                data = pd.read_csv(uploaded_file, index_col=0, parse_dates=True)
+            except pd.errors.ParserError:
+                st.error("Failed to parse the CSV file. Please check the file format.")
+                st.markdown("""
+                **File Format Requirements:**
+                - File must be a valid CSV
+                - First column must be dates
+                - All other columns must contain numeric values
+                """)
+                return
+                
+            # Verify we have date index
+            if not isinstance(data.index, pd.DatetimeIndex):
+                st.error("Date column could not be parsed properly.")
+                st.markdown("""
+                **Date Format Requirements:**
+                - First column must be named 'Date'
+                - Dates should be in YYYY-MM-DD format
+                - Example: 2023-12-31
+                """)
+                return
+                
+            # Verify we have numeric data
+            if not data.select_dtypes(include=[np.number]).columns.tolist():
+                st.error("No numeric columns found in the data.")
+                st.markdown("""
+                **Return Data Requirements:**
+                - Returns must be in decimal form
+                - Example: 0.05 for 5% return
+                - No text or special characters allowed
+                """)
+                return
+
             analyzer = HedgeFundAnalyzer()
             
             # Display statistics
@@ -159,12 +195,20 @@ def main():
             st.plotly_chart(corr_fig, use_container_width=True)
             
         except Exception as e:
-            st.error(f"Error processing file: {str(e)}")
-            st.markdown("""
-            Common issues:
-            - Date column not in YYYY-MM-DD format
-            - Returns not in decimal form
-            - Missing or incorrect column headers
+            st.error("An unexpected error occurred while processing the file.")
+            st.markdown(f"""
+            **Error Details:**
+            ```
+            {str(e)}
+            ```
+            
+            **Common Solutions:**
+            - Ensure all returns are numeric values
+            - Remove any currency symbols or percentage signs
+            - Check for missing values
+            - Verify date format in first column
+            
+            If the problem persists, please check the sample file format in the instructions above.
             """)
 
 if __name__ == "__main__":
