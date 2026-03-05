@@ -15,7 +15,7 @@ from analytics.absolute_risk import max_drawdown, drawdown_series
 
 st.title("Overview")
 
-# ── Guard: data must be loaded ────────────────────────────────────────────────
+# -- Guard: data must be loaded ────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 benchmark_returns: pd.DataFrame = st.session_state.get("benchmark_returns", pd.DataFrame())
 rf_annual: float = st.session_state.get("rf_annual", 0.0)
@@ -25,7 +25,7 @@ if fund_returns.empty:
     st.info("Please upload fund return data or enable Sample Data in the sidebar to get started.")
     st.stop()
 
-# ── Key metrics row ───────────────────────────────────────────────────────────
+# -- Key metrics row ───────────────────────────────────────────────────────────
 ann_ret = annualized_return_geometric(fund_returns)
 ann_vol = annualized_volatility(fund_returns)
 sr = sharpe_ratio(fund_returns, rf_annual)
@@ -40,7 +40,7 @@ c4.metric("Sortino Ratio", f"{sort_r:.2f}")
 
 st.divider()
 
-# ── Cumulative performance chart ──────────────────────────────────────────────
+# -- Cumulative performance chart ──────────────────────────────────────────────
 st.subheader("Cumulative Performance")
 
 cumulative_fund = (1 + fund_returns).cumprod()
@@ -68,17 +68,22 @@ if not benchmark_returns.empty:
 fig_cum.update_layout(
     yaxis_title="Growth of $1",
     xaxis_title="",
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     hovermode="x unified",
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
     margin=dict(l=40, r=20, t=30, b=40),
     height=420,
+    font=dict(color=COLORS["text_secondary"]),
+    yaxis=dict(gridcolor=COLORS["border"], showgrid=False),
+    xaxis=dict(gridcolor=COLORS["border"], showgrid=False),
 )
 st.plotly_chart(fig_cum, use_container_width=True)
 
 st.divider()
 
-# ── Two-column section: Histogram + Drawdown ──────────────────────────────────
+# -- Two-column section: Histogram + Drawdown ──────────────────────────────────
 col_left, col_right = st.columns(2)
 
 with col_left:
@@ -88,19 +93,22 @@ with col_left:
         x=fund_returns.values,
         nbinsx=30,
         marker_color=CHART_COLORS[0],
-        marker_line_color=COLORS["navy_900"],
-        marker_line_width=1,
+        marker_line_color=COLORS["border"],
+        marker_line_width=0.5,
         opacity=0.85,
         name="Fund",
     ))
     fig_hist.update_layout(
         xaxis_title="Monthly Return",
         yaxis_title="Frequency",
-        template="plotly_white",
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         showlegend=False,
         margin=dict(l=40, r=20, t=20, b=40),
         height=350,
         xaxis=dict(tickformat=".1%"),
+        font=dict(color=COLORS["text_secondary"]),
     )
     st.plotly_chart(fig_hist, use_container_width=True)
 
@@ -114,23 +122,26 @@ with col_right:
         fill="tozeroy",
         mode="lines",
         line=dict(color=COLORS["red"], width=1.5),
-        fillcolor="rgba(255, 92, 92, 0.3)",
+        fillcolor="rgba(248, 113, 113, 0.2)",
         name="Drawdown",
     ))
     fig_dd.update_layout(
         yaxis_title="Drawdown",
         xaxis_title="",
-        template="plotly_white",
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         showlegend=False,
         margin=dict(l=40, r=20, t=20, b=40),
         height=350,
         yaxis=dict(tickformat=".1%"),
+        font=dict(color=COLORS["text_secondary"]),
     )
     st.plotly_chart(fig_dd, use_container_width=True)
 
 st.divider()
 
-# ── Summary statistics table ──────────────────────────────────────────────────
+# -- Summary statistics table ──────────────────────────────────────────────────
 st.subheader("Summary Statistics")
 
 stats = {

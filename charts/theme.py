@@ -1,11 +1,11 @@
-"""Plotly layout defaults for the Qorba neobrutalist theme.
+"""Plotly layout defaults for the Qorba dark theme.
 
 Provides a consistent visual language across all charts:
 - Inter font family
-- White plot background, light gray paper background
-- No gridlines
-- Navy axis labels
-- Stripe-inspired color palette
+- Transparent plot/paper background (blends into dark page)
+- Subtle axis lines
+- Light gray labels on dark background
+- Dark-mode-friendly color palette
 """
 
 from config.settings import COLORS, CHART_COLORS
@@ -23,18 +23,18 @@ def get_layout(**overrides) -> dict:
         fig.update_layout(**get_layout(title="My Chart", height=500))
     """
     defaults = {
-        # ── Typography ────────────────────────────────────────────────
+        # -- Typography ────────────────────────────────────────────────
         "font": {
             "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
             "size": 13,
-            "color": COLORS["navy_900"],
+            "color": COLORS["text_secondary"],
         },
         "title": {
             "font": {
                 "family": "Inter, -apple-system, BlinkMacSystemFont, sans-serif",
                 "size": 18,
-                "weight": 800,
-                "color": COLORS["navy_900"],
+                "weight": 700,
+                "color": COLORS["text_primary"],
             },
             "x": 0.0,
             "xanchor": "left",
@@ -43,58 +43,58 @@ def get_layout(**overrides) -> dict:
             "pad": {"l": 10, "t": 10},
         },
 
-        # ── Background ───────────────────────────────────────────────
-        "plot_bgcolor": COLORS["white"],
-        "paper_bgcolor": COLORS["gray_100"],
+        # -- Background (transparent to blend into dark page) ─────────
+        "plot_bgcolor": "rgba(0,0,0,0)",
+        "paper_bgcolor": "rgba(0,0,0,0)",
 
-        # ── X-Axis ───────────────────────────────────────────────────
+        # -- X-Axis ───────────────────────────────────────────────────
         "xaxis": {
             "showgrid": False,
             "zeroline": False,
             "showline": True,
-            "linewidth": 1.5,
-            "linecolor": COLORS["gray_200"],
+            "linewidth": 1,
+            "linecolor": COLORS["border"],
             "tickfont": {
                 "family": "Inter, sans-serif",
                 "size": 11,
-                "color": COLORS["navy_700"],
+                "color": COLORS["text_secondary"],
             },
             "title_font": {
                 "family": "Inter, sans-serif",
                 "size": 12,
-                "color": COLORS["navy_700"],
+                "color": COLORS["text_secondary"],
                 "weight": 600,
             },
         },
 
-        # ── Y-Axis ───────────────────────────────────────────────────
+        # -- Y-Axis ───────────────────────────────────────────────────
         "yaxis": {
             "showgrid": False,
             "zeroline": False,
             "showline": True,
-            "linewidth": 1.5,
-            "linecolor": COLORS["gray_200"],
+            "linewidth": 1,
+            "linecolor": COLORS["border"],
             "tickfont": {
                 "family": "Inter, sans-serif",
                 "size": 11,
-                "color": COLORS["navy_700"],
+                "color": COLORS["text_secondary"],
             },
             "title_font": {
                 "family": "Inter, sans-serif",
                 "size": 12,
-                "color": COLORS["navy_700"],
+                "color": COLORS["text_secondary"],
                 "weight": 600,
             },
         },
 
-        # ── Legend ────────────────────────────────────────────────────
+        # -- Legend ────────────────────────────────────────────────────
         "legend": {
             "font": {
                 "family": "Inter, sans-serif",
                 "size": 12,
-                "color": COLORS["navy_900"],
+                "color": COLORS["text_secondary"],
             },
-            "bgcolor": "rgba(255,255,255,0)",
+            "bgcolor": "rgba(0,0,0,0)",
             "borderwidth": 0,
             "orientation": "h",
             "yanchor": "bottom",
@@ -103,20 +103,20 @@ def get_layout(**overrides) -> dict:
             "x": 0.0,
         },
 
-        # ── Margins ──────────────────────────────────────────────────
+        # -- Margins ──────────────────────────────────────────────────
         "margin": {"l": 60, "r": 30, "t": 70, "b": 50},
 
-        # ── Hover ────────────────────────────────────────────────────
+        # -- Hover ────────────────────────────────────────────────────
         "hoverlabel": {
-            "bgcolor": COLORS["navy_900"],
+            "bgcolor": COLORS["bg_elevated"],
             "font_size": 12,
             "font_family": "Inter, sans-serif",
-            "font_color": COLORS["white"],
-            "bordercolor": COLORS["navy_900"],
+            "font_color": COLORS["text_primary"],
+            "bordercolor": COLORS["border"],
         },
         "hovermode": "x unified",
 
-        # ── Color ────────────────────────────────────────────────────
+        # -- Color ────────────────────────────────────────────────────
         "colorway": CHART_COLORS,
     }
 

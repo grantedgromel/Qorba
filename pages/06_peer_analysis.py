@@ -9,7 +9,7 @@ from analytics.peer_group import quartile_distribution, rolling_percentile
 
 st.title("Peer Group Analysis")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 peer_returns: pd.DataFrame = st.session_state.get("peer_returns", pd.DataFrame())
 
@@ -22,7 +22,7 @@ if peer_returns.empty:
             "or enable Sample Data.")
     st.stop()
 
-# ── Quartile Distribution ────────────────────────────────────────────────────
+# -- Quartile Distribution ────────────────────────────────────────────────────
 st.subheader("Quartile Distribution Across Periods")
 
 periods = [12, 24, 36, 48, 60]
@@ -60,9 +60,9 @@ for _, row in qd.iterrows():
         x=[period],
         y=[row["75th (Q3)"] - row["25th (Q1)"]],
         base=[row["25th (Q1)"]],
-        marker_color="rgba(99, 91, 255, 0.2)",
-        marker_line_color=COLORS["navy_900"],
-        marker_line_width=1.5,
+        marker_color="rgba(129, 140, 248, 0.2)",
+        marker_line_color=COLORS["border"],
+        marker_line_width=0.5,
         name="Q1-Q3 Range" if _ == 0 else None,
         showlegend=(_ == 0),
         width=0.6,
@@ -73,7 +73,7 @@ for _, row in qd.iterrows():
         x=[period],
         y=[row["Median"]],
         mode="markers",
-        marker=dict(color=COLORS["navy_900"], size=12, symbol="line-ew-open", line_width=3),
+        marker=dict(color=COLORS["text_secondary"], size=12, symbol="line-ew-open", line_width=3),
         name="Median" if _ == 0 else None,
         showlegend=(_ == 0),
     ))
@@ -84,7 +84,7 @@ for _, row in qd.iterrows():
         y=[row["Fund"]],
         mode="markers",
         marker=dict(color=CHART_COLORS[0], size=14, symbol="diamond",
-                    line=dict(color=COLORS["navy_900"], width=1.5)),
+                    line=dict(color=COLORS["border"], width=0.5)),
         name="Fund" if _ == 0 else None,
         showlegend=(_ == 0),
     ))
@@ -92,18 +92,21 @@ for _, row in qd.iterrows():
 fig_q.update_layout(
     yaxis_title="Annualized Return",
     xaxis_title="Period",
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     height=420,
     margin=dict(l=40, r=20, t=30, b=40),
     yaxis=dict(tickformat=".1%"),
     barmode="overlay",
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+    font=dict(color=COLORS["text_secondary"]),
 )
 st.plotly_chart(fig_q, use_container_width=True)
 
 st.divider()
 
-# ── Rolling Percentile ───────────────────────────────────────────────────────
+# -- Rolling Percentile ───────────────────────────────────────────────────────
 st.subheader("Rolling Percentile Ranking")
 
 roll_window = st.selectbox("Rolling Window (months)", [6, 12, 24, 36], index=1)
@@ -124,19 +127,25 @@ else:
 
     # Quartile reference lines
     fig_roll.add_hline(y=25, line_dash="dash", line_color=COLORS["green"],
-                       annotation_text="Top Quartile", annotation_position="top left")
-    fig_roll.add_hline(y=50, line_dash="dash", line_color=COLORS["navy_700"],
-                       annotation_text="Median")
+                       annotation_text="Top Quartile", annotation_position="top left",
+                       annotation_font_color=COLORS["text_secondary"])
+    fig_roll.add_hline(y=50, line_dash="dash", line_color=COLORS["text_muted"],
+                       annotation_text="Median",
+                       annotation_font_color=COLORS["text_secondary"])
     fig_roll.add_hline(y=75, line_dash="dash", line_color=COLORS["red"],
-                       annotation_text="Bottom Quartile", annotation_position="bottom left")
+                       annotation_text="Bottom Quartile", annotation_position="bottom left",
+                       annotation_font_color=COLORS["text_secondary"])
 
     fig_roll.update_layout(
         yaxis_title="Percentile (1=best, 100=worst)",
         xaxis_title="",
-        template="plotly_white",
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         height=400,
         margin=dict(l=40, r=20, t=30, b=40),
         yaxis=dict(autorange="reversed", range=[0, 100]),
         hovermode="x unified",
+        font=dict(color=COLORS["text_secondary"]),
     )
     st.plotly_chart(fig_roll, use_container_width=True)

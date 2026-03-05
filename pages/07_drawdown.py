@@ -9,14 +9,14 @@ from analytics.absolute_risk import drawdown_series, drawdown_table
 
 st.title("Drawdown Analysis")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 
 if fund_returns.empty:
     st.info("Please upload fund return data or enable Sample Data in the sidebar to get started.")
     st.stop()
 
-# ── Drawdown episodes table (Travers Table 6.3) ──────────────────────────────
+# -- Drawdown episodes table (Travers Table 6.3) ──────────────────────────────
 st.subheader("Drawdown Episodes")
 
 dd_tbl = drawdown_table(fund_returns, top_n=10)
@@ -32,7 +32,7 @@ else:
 
 st.divider()
 
-# ── Full underwater chart ─────────────────────────────────────────────────────
+# -- Full underwater chart ─────────────────────────────────────────────────────
 st.subheader("Underwater Chart")
 
 dd = drawdown_series(fund_returns)
@@ -44,25 +44,28 @@ fig_uw.add_trace(go.Scatter(
     fill="tozeroy",
     mode="lines",
     line=dict(color=COLORS["red"], width=1.5),
-    fillcolor="rgba(255, 92, 92, 0.3)",
+    fillcolor="rgba(248, 113, 113, 0.2)",
     name="Drawdown",
     hovertemplate="%{x|%b %Y}: %{y:.2%}<extra></extra>",
 ))
 fig_uw.update_layout(
     yaxis_title="Drawdown from Peak",
     xaxis_title="",
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     height=380,
     margin=dict(l=40, r=20, t=20, b=40),
     yaxis=dict(tickformat=".1%"),
     showlegend=False,
     hovermode="x unified",
+    font=dict(color=COLORS["text_secondary"]),
 )
 st.plotly_chart(fig_uw, use_container_width=True)
 
 st.divider()
 
-# ── Top 5 drawdown highlight chart ───────────────────────────────────────────
+# -- Top 5 drawdown highlight chart ───────────────────────────────────────────
 st.subheader("Top 5 Drawdowns on Cumulative Performance")
 
 cumulative = (1 + fund_returns).cumprod()
@@ -106,12 +109,13 @@ if not dd_tbl.empty:
     episode_depths.sort(key=lambda x: x[2])
     top_5 = episode_depths[:5]
 
+    # Dark-mode friendly highlight colors
     highlight_colors = [
-        "rgba(255, 92, 92, 0.25)",
-        "rgba(255, 159, 67, 0.25)",
-        "rgba(255, 217, 61, 0.25)",
-        "rgba(0, 212, 170, 0.20)",
-        "rgba(122, 115, 255, 0.20)",
+        "rgba(248, 113, 113, 0.15)",
+        "rgba(251, 191, 36, 0.15)",
+        "rgba(167, 139, 250, 0.15)",
+        "rgba(74, 222, 128, 0.12)",
+        "rgba(129, 140, 248, 0.12)",
     ]
 
     for idx, (s, e, depth) in enumerate(top_5):
@@ -126,15 +130,19 @@ if not dd_tbl.empty:
             annotation_text=f"#{idx+1} ({depth:.1%})",
             annotation_position="top left",
             annotation_font_size=10,
+            annotation_font_color=COLORS["text_secondary"],
         )
 
 fig_hl.update_layout(
     yaxis_title="Growth of $1",
     xaxis_title="",
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     height=450,
     margin=dict(l=40, r=20, t=30, b=40),
     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
     hovermode="x unified",
+    font=dict(color=COLORS["text_secondary"]),
 )
 st.plotly_chart(fig_hl, use_container_width=True)

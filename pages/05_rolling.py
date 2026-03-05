@@ -26,7 +26,7 @@ from analytics.rolling import (
 
 st.title("Rolling Analytics")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 benchmark_returns: pd.DataFrame = st.session_state.get("benchmark_returns", pd.DataFrame())
 rf_annual: float = st.session_state.get("rf_annual", 0.0)
@@ -38,7 +38,7 @@ if fund_returns.empty:
 
 has_benchmarks = not benchmark_returns.empty
 
-# ── Window controls ───────────────────────────────────────────────────────────
+# -- Window controls ───────────────────────────────────────────────────────────
 st.subheader("Window Settings")
 
 wc1, wc2, wc3 = st.columns(3)
@@ -86,7 +86,9 @@ def _rolling_metric_chart(title: str, series_dict: dict, y_format: str = ".2f",
             color_idx += 1
     fig.update_layout(
         title=title,
-        template="plotly_white",
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         height=350,
         margin=dict(l=40, r=20, t=40, b=40),
         yaxis=dict(tickformat=y_format),
@@ -94,13 +96,14 @@ def _rolling_metric_chart(title: str, series_dict: dict, y_format: str = ".2f",
         xaxis_title="",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
         hovermode="x unified",
+        font=dict(color=COLORS["text_secondary"]),
     )
     return fig
 
 
 st.divider()
 
-# ── Performance group ─────────────────────────────────────────────────────────
+# -- Performance group ─────────────────────────────────────────────────────────
 st.subheader("Performance")
 
 # Rolling Return
@@ -121,7 +124,7 @@ st.plotly_chart(_rolling_metric_chart("Rolling Sortino Ratio", series), use_cont
 
 st.divider()
 
-# ── Risk group ────────────────────────────────────────────────────────────────
+# -- Risk group ────────────────────────────────────────────────────────────────
 st.subheader("Risk")
 
 # Rolling Max DD
@@ -142,7 +145,7 @@ st.plotly_chart(_rolling_metric_chart("Rolling Kurtosis", series, y_format=".2f"
 
 st.divider()
 
-# ── Benchmark-relative group ─────────────────────────────────────────────────
+# -- Benchmark-relative group ─────────────────────────────────────────────────
 if has_benchmarks:
     st.subheader("Benchmark-Relative")
 
@@ -191,7 +194,7 @@ if has_benchmarks:
 
     st.divider()
 
-# ── Style group ───────────────────────────────────────────────────────────────
+# -- Style group ───────────────────────────────────────────────────────────────
 st.subheader("Style")
 
 # Rolling Win Rate

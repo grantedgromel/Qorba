@@ -24,7 +24,7 @@ from analytics.absolute_risk import (
 
 st.title("Risk Measures")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 mar_annual: float = st.session_state.get("mar_annual", 0.0)
 
@@ -34,7 +34,7 @@ if fund_returns.empty:
 
 qtr = quarterly_returns(fund_returns)
 
-# ── Standard Deviation section ────────────────────────────────────────────────
+# -- Standard Deviation section ────────────────────────────────────────────────
 st.subheader("Standard Deviation Measures")
 
 sd = standard_deviation(fund_returns)
@@ -51,22 +51,26 @@ fig_std = go.Figure(go.Bar(
     x=["Annualized Std Dev", "Gain Std Dev", "Loss Std Dev"],
     y=[sd, g_std, l_std],
     marker_color=[CHART_COLORS[0], COLORS["green"], COLORS["red"]],
-    marker_line_color=COLORS["navy_900"],
-    marker_line_width=1.5,
+    marker_line_color=COLORS["border"],
+    marker_line_width=0.5,
     text=[f"{sd:.2%}", f"{g_std:.2%}", f"{l_std:.2%}"],
     textposition="outside",
+    textfont=dict(color=COLORS["text_secondary"]),
 ))
 fig_std.update_layout(
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     height=300,
     margin=dict(l=40, r=20, t=20, b=40),
     yaxis=dict(tickformat=".2%"),
+    font=dict(color=COLORS["text_secondary"]),
 )
 st.plotly_chart(fig_std, use_container_width=True)
 
 st.divider()
 
-# ── Downside Deviation & Semideviation ────────────────────────────────────────
+# -- Downside Deviation & Semideviation ────────────────────────────────────────
 st.subheader("Downside Risk")
 
 dd_val = downside_deviation(fund_returns, mar_annual)
@@ -78,7 +82,7 @@ c2.metric("Semideviation", f"{semi_val:.2%}")
 
 st.divider()
 
-# ── Skewness ──────────────────────────────────────────────────────────────────
+# -- Skewness ──────────────────────────────────────────────────────────────────
 st.subheader("Skewness")
 
 skew_m = skewness(fund_returns)
@@ -99,7 +103,7 @@ else:
 
 st.divider()
 
-# ── Kurtosis ──────────────────────────────────────────────────────────────────
+# -- Kurtosis ──────────────────────────────────────────────────────────────────
 st.subheader("Kurtosis")
 
 kurt_m = kurtosis(fund_returns)
@@ -124,7 +128,7 @@ else:
 
 st.divider()
 
-# ── Gain / Loss Ratio ────────────────────────────────────────────────────────
+# -- Gain / Loss Ratio ────────────────────────────────────────────────────────
 st.subheader("Gain / Loss Analysis")
 
 gl_ratio = gain_loss_ratio(fund_returns)

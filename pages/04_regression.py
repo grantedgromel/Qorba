@@ -14,7 +14,7 @@ from analytics.regression import (
 
 st.title("Regression Analysis")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 benchmark_returns: pd.DataFrame = st.session_state.get("benchmark_returns", pd.DataFrame())
 rf_annual: float = st.session_state.get("rf_annual", 0.0)
@@ -28,7 +28,7 @@ if benchmark_returns.empty:
                "or enable Sample Data.")
     st.stop()
 
-# ── Per-benchmark regression ──────────────────────────────────────────────────
+# -- Per-benchmark regression ──────────────────────────────────────────────────
 for i, col in enumerate(benchmark_returns.columns):
     bm = benchmark_returns[col]
     st.subheader(f"Regression vs {col}")
@@ -53,7 +53,7 @@ for i, col in enumerate(benchmark_returns.columns):
             marker=dict(
                 color=CHART_COLORS[0],
                 size=7,
-                line=dict(color=COLORS["navy_900"], width=1),
+                line=dict(color=COLORS["border"], width=0.5),
                 opacity=0.7,
             ),
             name="Monthly Returns",
@@ -68,12 +68,15 @@ for i, col in enumerate(benchmark_returns.columns):
         fig.update_layout(
             xaxis_title=f"{col} Return",
             yaxis_title="Fund Return",
-            template="plotly_white",
+            template="plotly_dark",
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             height=380,
             margin=dict(l=40, r=20, t=30, b=40),
             xaxis=dict(tickformat=".1%"),
             yaxis=dict(tickformat=".1%"),
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+            font=dict(color=COLORS["text_secondary"]),
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -86,7 +89,7 @@ for i, col in enumerate(benchmark_returns.columns):
 
     st.divider()
 
-# ── Correlation Heatmap ───────────────────────────────────────────────────────
+# -- Correlation Heatmap ───────────────────────────────────────────────────────
 st.subheader("Correlation Matrix")
 
 combined = pd.DataFrame({"Fund": fund_returns})
@@ -101,20 +104,23 @@ fig_heat = go.Figure(data=go.Heatmap(
     y=corr.index.tolist(),
     colorscale=[
         [0.0, COLORS["red"]],
-        [0.5, COLORS["white"]],
+        [0.5, COLORS["bg_card"]],
         [1.0, CHART_COLORS[0]],
     ],
     zmin=-1,
     zmax=1,
     text=[[f"{v:.2f}" for v in row] for row in corr.values],
     texttemplate="%{text}",
-    textfont=dict(size=14),
+    textfont=dict(size=14, color=COLORS["text_primary"]),
     hovertemplate="(%{x}, %{y}): %{z:.3f}<extra></extra>",
 ))
 fig_heat.update_layout(
-    template="plotly_white",
+    template="plotly_dark",
+    plot_bgcolor="rgba(0,0,0,0)",
+    paper_bgcolor="rgba(0,0,0,0)",
     height=400,
     margin=dict(l=60, r=20, t=20, b=60),
     xaxis=dict(side="bottom"),
+    font=dict(color=COLORS["text_secondary"]),
 )
 st.plotly_chart(fig_heat, use_container_width=True)

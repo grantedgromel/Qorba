@@ -20,7 +20,7 @@ from analytics.absolute_return import (
 
 st.title("Return Measures")
 
-# ── Guard ─────────────────────────────────────────────────────────────────────
+# -- Guard ─────────────────────────────────────────────────────────────────────
 fund_returns: pd.Series = st.session_state.get("fund_returns", pd.Series(dtype=float))
 benchmark_returns: pd.DataFrame = st.session_state.get("benchmark_returns", pd.DataFrame())
 rf_annual: float = st.session_state.get("rf_annual", 0.0)
@@ -33,7 +33,7 @@ if fund_returns.empty:
 
 has_benchmarks = not benchmark_returns.empty
 
-# ── Compute fund metrics ──────────────────────────────────────────────────────
+# -- Compute fund metrics ──────────────────────────────────────────────────────
 first_bm = benchmark_returns.iloc[:, 0] if has_benchmarks else None
 fund_metrics = compute_all_return_metrics(
     fund_returns, rf_annual, mar_annual, omega_threshold, first_bm
@@ -61,22 +61,26 @@ def _comparison_bar(metric_name: str, fund_val: float, is_pct: bool = False):
         x=names,
         y=values,
         marker_color=colors,
-        marker_line_color=COLORS["navy_900"],
-        marker_line_width=1.5,
+        marker_line_color=COLORS["border"],
+        marker_line_width=0.5,
         text=[f"{v:.2%}" if is_pct else f"{v:.2f}" for v in values],
         textposition="outside",
+        textfont=dict(color=COLORS["text_secondary"]),
     ))
     fig.update_layout(
-        template="plotly_white",
+        template="plotly_dark",
+        plot_bgcolor="rgba(0,0,0,0)",
+        paper_bgcolor="rgba(0,0,0,0)",
         height=280,
         margin=dict(l=40, r=20, t=20, b=40),
         yaxis_title=metric_name,
         yaxis=dict(tickformat=".2%" if is_pct else ".2f"),
+        font=dict(color=COLORS["text_secondary"]),
     )
     return fig
 
 
-# ── Metric definitions with formulas ─────────────────────────────────────────
+# -- Metric definitions with formulas ─────────────────────────────────────────
 metric_configs = [
     {
         "name": "Sharpe Ratio",
@@ -130,7 +134,7 @@ metric_configs = [
     },
 ]
 
-# ── Render each metric ────────────────────────────────────────────────────────
+# -- Render each metric ────────────────────────────────────────────────────────
 for cfg in metric_configs:
     needs_bm = cfg.get("needs_benchmark", False)
     if needs_bm and not has_benchmarks:
@@ -160,7 +164,7 @@ for cfg in metric_configs:
 
     st.divider()
 
-# ── Full metrics table ────────────────────────────────────────────────────────
+# -- Full metrics table ────────────────────────────────────────────────────────
 st.subheader("All Return Metrics")
 
 rows = {}

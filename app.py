@@ -3,11 +3,11 @@
 import streamlit as st
 import pandas as pd
 
-from config.settings import CUSTOM_CSS, FUND_TYPES
+from config.settings import CUSTOM_CSS, FUND_TYPES, LOGO_SVG
 from data.loader import load_fund_returns, load_returns, align_dates, validate_data
 from data.sample_data import generate_sample_data
 
-# ── Page configuration ────────────────────────────────────────────────────────
+# -- Page configuration ────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="QORBA | Hedge Fund Analytics",
     page_icon=None,
@@ -15,13 +15,12 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Inject neobrutalist CSS
+# Inject dark mode CSS
 st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
 
-# ── Sidebar ───────────────────────────────────────────────────────────────────
+# -- Sidebar ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("# **QORBA**")
-    st.caption("Hedge Fund Analytics")
+    st.markdown(LOGO_SVG, unsafe_allow_html=True)
     st.divider()
 
     # Fund type selector
@@ -52,7 +51,7 @@ with st.sidebar:
     st.session_state["mar_annual"] = mar_pct / 100.0
     st.session_state["omega_threshold"] = omega_pct / 100.0
 
-# ── Load data ─────────────────────────────────────────────────────────────────
+# -- Load data ─────────────────────────────────────────────────────────────────
 fund_returns = pd.Series(dtype=float)
 benchmark_returns = pd.DataFrame()
 peer_returns = pd.DataFrame()
@@ -84,7 +83,7 @@ st.session_state["benchmark_returns"] = benchmark_returns
 st.session_state["peer_returns"] = peer_returns
 st.session_state["data_loaded"] = not fund_returns.empty
 
-# ── Data summary in sidebar ───────────────────────────────────────────────────
+# -- Data summary in sidebar ───────────────────────────────────────────────────
 with st.sidebar:
     st.divider()
     st.markdown("### Data Summary")
@@ -109,7 +108,7 @@ with st.sidebar:
     else:
         st.info("Upload fund returns or enable Sample Data to begin.")
 
-# ── Navigation ────────────────────────────────────────────────────────────────
+# -- Navigation ────────────────────────────────────────────────────────────────
 pages = [
     st.Page("pages/01_overview.py", title="Overview", icon=None),
     st.Page("pages/02_absolute_return.py", title="Return Measures", icon=None),
