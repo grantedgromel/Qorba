@@ -5,6 +5,7 @@ import pandas as pd
 
 from config.settings import CUSTOM_CSS, FUND_TYPES, LOGO_SVG
 from data.loader import load_fund_returns, load_returns, align_dates, validate_data
+from data.pdf_parser import extract_returns_from_pdf
 from data.sample_data import generate_sample_data
 
 # -- Page configuration ────────────────────────────────────────────────────────
@@ -30,7 +31,10 @@ with st.sidebar:
     st.divider()
 
     # File uploaders
-    fund_file = st.file_uploader("Fund Returns (required)", type=["csv", "xlsx", "xls"])
+    fund_file = st.file_uploader(
+        "Fund Returns (required)", type=["csv", "xlsx", "xls", "pdf"],
+        help="Upload CSV/Excel with returns, or a PDF tearsheet",
+    )
     bench_file = st.file_uploader("Benchmark Returns (optional)", type=["csv", "xlsx", "xls"])
     peer_file = st.file_uploader("Peer Group Returns (optional)", type=["csv", "xlsx", "xls"])
 
@@ -55,12 +59,19 @@ with st.sidebar:
 fund_returns = pd.Series(dtype=float)
 benchmark_returns = pd.DataFrame()
 peer_returns = pd.DataFrame()
+pdf_extracted = False
 
 if use_sample:
     fund_returns, benchmark_returns, peer_returns = generate_sample_data()
 else:
     if fund_file is not None:
-        fund_returns = load_fund_returns(fund_file)
+        if fund_file.name.lower().endswith(".pdf"):
+            from io import BytesIO
+            raw = BytesIO(fund_file.read())
+            fund_returns = extract_returns_from_pdf(raw)
+            pdf_extracted = not fund_returns.empty
+        else:
+            fund_returns = load_fund_returns(fund_file)
     if bench_file is not None:
         benchmark_returns = load_returns(bench_file)
     if peer_file is not None:
@@ -76,6 +87,54 @@ if not fund_returns.empty and not peer_returns.empty:
     aligned = align_dates(fund_returns, peer_returns)
     fund_returns = aligned[0]
     peer_returns = aligned[1]
+
+# -- PDF preview ──────────────────────────────────────────────────────────────
+if pdf_extracted:
+    with st.expander("PDF Tearsheet Preview -- Extracted Returns", expanded=True):
+        if fund_returns.empty:
+            st.error("Could not extract return data from the PDF. "
+                     "Try uploading a CSV or Excel file instead.")
+        else:
+            st.success(f"Extracted **{len(fund_returns)}** monthly returns "
+                       f"({fund_returns.index[0].strftime('%b %Y')} -- "
+                       f"{fund_returns.index[-1].strftime('%b %Y')})")
+
+            prev_col1, prev_col2 = st.columns([3, 2])
+            with prev_col1:
+                # Quick cumulative growth sparkline
+                import plotly.graph_objects as go
+                from config.settings import CHART_COLORS, COLORS
+                cum = (1 + fund_returns).cumprod()
+                fig_preview = go.Figure()
+                fig_preview.add_trace(go.Scatter(
+                    x=cum.index, y=cum.values,
+                    mode="lines",
+                    line=dict(color=CHART_COLORS[0], width=2),
+                    fill="tozeroy",
+                    fillcolor="rgba(96, 165, 250, 0.15)",
+                ))
+                fig_preview.update_layout(
+                    title="Cumulative Growth of $1",
+                    template="plotly_dark",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    paper_bgcolor="rgba(0,0,0,0)",
+                    showlegend=False,
+                    margin=dict(l=40, r=20, t=40, b=30),
+                    height=250,
+                    yaxis=dict(gridcolor=COLORS["border"], showgrid=False),
+                    xaxis=dict(gridcolor=COLORS["border"], showgrid=False),
+                    font=dict(color=COLORS["text_secondary"]),
+                )
+                st.plotly_chart(fig_preview, use_container_width=True)
+
+            with prev_col2:
+                # Show the extracted data table
+                preview_df = fund_returns.to_frame("Return")
+                preview_df.index = preview_df.index.strftime("%Y-%m")
+                preview_df["Return"] = preview_df["Return"].map("{:.2%}".format)
+                st.dataframe(preview_df, height=250, use_container_width=True)
+
+            st.caption("Verify the extracted data looks correct before proceeding to analysis.")
 
 # Store in session state
 st.session_state["fund_returns"] = fund_returns
