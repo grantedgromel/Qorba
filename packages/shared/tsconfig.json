@@ -1,0 +1,4 @@
+{
+  "extends": "@qorba/tsconfig/base.json",
+  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+}

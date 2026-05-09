@@ -1,0 +1,12 @@
+# Sprint 1 dev Caddyfile. Sprint 6 hardens this for prod with auto-TLS.
+:80 {
+    # API routes go to FastAPI.
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+
+    # Everything else to Next.js.
+    handle {
+        reverse_proxy web:3000
+    }
+}

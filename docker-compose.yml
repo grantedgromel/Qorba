@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: qorba
+      POSTGRES_PASSWORD: qorba
+      POSTGRES_DB: qorba
+    ports:
+      - "5432:5432"
+    volumes:
+      - qorba_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qorba"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.api
+    environment:
+      QORBA_ENV: dev
+      QORBA_DATABASE_URL: postgresql+psycopg://qorba:qorba@postgres:5432/qorba
+      QORBA_SESSION_SECRET: ${QORBA_SESSION_SECRET:-dev-secret-change-me-32-bytes-min}
+      QORBA_WEB_ORIGIN: http://localhost:3000
+      QORBA_ALLOW_REGISTRATION: "true"
+      CAISSA_API_KEY: ${CAISSA_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: infra/Dockerfile.web
+    environment:
+      API_URL: http://api:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  qorba_pg_data:

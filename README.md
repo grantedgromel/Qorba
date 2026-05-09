@@ -1,74 +1,87 @@
 # Qorba
 
-Hedge fund analytics dashboard built with Streamlit. Upload monthly fund returns (CSV, Excel, or PDF tearsheet) along with optional benchmark and peer-group series, and Qorba produces an interactive performance, risk, regression, drawdown, and peer-comparison report.
+Public-manager analytics for institutional allocators.
 
-## Quick start
+> Sprint 1 status: monorepo bootstrap. CSV upload → Sharpe round-trip works
+> end-to-end. PDF ingestion, peer groups, exports, charts and the metric
+> picker arrive in Sprints 2-6. The full plan lives on the planning branch
+> at `docs/qorba-v2-plan.md`.
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Frontend | Next.js 15 App Router, React 19, Tailwind v3, shadcn primitives |
+| Backend | FastAPI, Pydantic v2, SQLAlchemy 2 |
+| DB / cache / queue | Postgres 16, Redis 7 |
+| Charts | Visx (Sprint 3+) |
+| Contracts | OpenAPI → `openapi-typescript` codegen, drift-checked in CI |
+| Hosting | Self-hostable Docker stack via `docker compose up` |
+
+## Repo layout
+
+```
+apps/
+  api/      FastAPI service. Travers Chapter 6 analytics in core/analytics/.
+  web/      Next.js frontend.
+packages/
+  shared/   Generated TS types (do not edit by hand).
+  tsconfig/ Shared tsconfig presets.
+infra/      Dockerfiles + Caddyfile for self-host.
+scripts/    codegen.sh, golden PDF fixtures.
+```
+
+## Local dev
+
+### Docker (recommended)
 
 ```bash
-pip install -r requirements.txt
-streamlit run app.py
+cp .env.example .env   # then edit secrets
+docker compose up --build
+# Web:  http://localhost:3000
+# API:  http://localhost:8000/api/v1/health
 ```
 
-The app serves at `http://localhost:8501`. A devcontainer (`.devcontainer/devcontainer.json`) is configured to launch this automatically in Codespaces and forward port 8501.
+### Without Docker
 
-To explore the UI without your own data, tick **Use Sample Data** in the sidebar.
+```bash
+# API
+cd apps/api
+uv venv .venv
+uv pip install -e ".[dev]"
+.venv/bin/uvicorn qorba_api.main:app --reload
 
-## Input file formats
-
-All numeric series are interpreted as **monthly returns**. Values with magnitude > 1.0 are auto-detected as percentages and rescaled to decimals (so `2.5` and `0.025` are both treated as 2.5%).
-
-- **Fund returns (required)** — CSV, XLSX, XLS, or PDF tearsheet.
-  - Tabular files: a date column (named `date`, `month`, `period`, etc., or the first column) plus a return column. The first numeric column is used.
-  - PDF: parsed with PyMuPDF; review the extracted preview before relying on it.
-- **Benchmark returns (optional)** — CSV/Excel; one or more return columns alongside a date column.
-- **Peer group returns (optional)** — CSV/Excel; one return column per peer fund.
-
-Recognized date formats include `YYYY-MM-DD`, `MM/DD/YYYY`, `YYYY-MM`, `DD/MM/YYYY`, and `YYYYMMDD`. Fund/benchmark/peer series are aligned to their common date intersection.
-
-## Sidebar parameters
-
-- **Fund Type** — Long-Only Equity, Long-Short Equity, Quantitative, or Other Hedge Fund.
-- **Risk-Free Rate (%)** — annualized, used in Sharpe and excess-return calculations.
-- **MAR (%)** — annualized minimum acceptable return for Sortino and downside metrics.
-- **Omega Threshold (%)** — monthly threshold for the Omega ratio.
-
-## Pages
-
-| Page | Contents |
-| --- | --- |
-| Overview | Headline KPIs, cumulative growth, return distribution. |
-| Return Measures | CAGR, arithmetic/geometric means, period returns. |
-| Risk Measures | Volatility, downside deviation, VaR/CVaR, Sharpe/Sortino/Omega/Calmar/Sterling. |
-| Regression Analysis | Alpha/beta vs. benchmarks, capture ratios, scatter and correlation. |
-| Rolling Analytics | Rolling return, vol, Sharpe, beta. |
-| Peer Group Analysis | Percentile ranks and peer comparison charts. |
-| Drawdown Analysis | Underwater curve, top drawdowns table. |
-| Calendar Performance | Monthly heatmap and yearly returns. |
-
-## Project layout
-
-```
-app.py                # Streamlit entry point: sidebar, data loading, navigation
-config/settings.py    # Defaults, dark-mode palette, CSS, logo
-data/
-  loader.py           # CSV/Excel parsing, date alignment, validation
-  pdf_parser.py       # PDF tearsheet extraction
-  sample_data.py      # Synthetic series for the demo toggle
-analytics/            # Calculation modules (return, risk, regression, rolling, peer)
-charts/               # Plotly chart builders + theme
-pages/                # One Streamlit page per analysis section
-tests/                # (Currently empty)
+# Web (separate terminal)
+pnpm install
+pnpm --filter @qorba/web dev
 ```
 
-## Development
+You'll need a Postgres on `localhost:5432` (or override `QORBA_DATABASE_URL`).
 
-The dashboard targets Python 3.11 (matches the devcontainer image). Dependencies are pinned in `requirements.txt`:
+## Tests
 
-- streamlit ≥ 1.45
-- plotly ≥ 6.0
-- scipy ≥ 1.15
-- statsmodels ≥ 0.14
-- openpyxl ≥ 3.1, xlrd ≥ 2.0 (Excel)
-- pymupdf ≥ 1.24 (PDF)
+```bash
+# API
+cd apps/api && .venv/bin/pytest -q
 
-There is no test suite yet; `tests/` contains only an `__init__.py`.
+# Web typecheck and build
+pnpm --filter @qorba/web typecheck
+pnpm --filter @qorba/web build
+```
+
+## Codegen
+
+API contracts are the source of truth. After changing a Pydantic schema or
+adding an endpoint, regenerate the TS types:
+
+```bash
+pnpm codegen           # writes packages/shared/src/openapi.d.ts
+pnpm codegen:check     # CI uses this; fails on drift
+```
+
+## Decisions of record
+
+The "what and why" is in the planning doc. Single-user with login; Caissa as
+the benchmark data source via the user's key; Tier 3 PDF parsing via
+Anthropic with per-upload + monthly USD caps; pct-vs-decimal is always
+confirmed by the user in the correction UI.
