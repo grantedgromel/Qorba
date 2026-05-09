@@ -163,8 +163,8 @@ def probe(
 
 # Caissa endpoint paths are PROVISIONAL. The user can override at request
 # time via ?path= so we don't need a code change to try alternates.
-DEFAULT_LIST_PATH = "/api/v1/benchmarks"
-DEFAULT_RETURNS_PATH_TEMPLATE = "/api/v1/benchmarks/{code}/returns"
+DEFAULT_LIST_PATH = "/v1/benchmarks"
+DEFAULT_RETURNS_PATH_TEMPLATE = "/v1/benchmarks/{code}/returns"
 
 
 def _coerce_benchmark_list(payload: object) -> list[dict]:

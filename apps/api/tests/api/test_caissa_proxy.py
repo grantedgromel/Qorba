@@ -65,12 +65,12 @@ def test_status_with_token_decodes_metadata(client) -> None:
 def test_probe_passthrough(client) -> None:
     _register(client)
     token = _fake_jwt()
-    respx.get("https://client-api.caissallc.com/api/v1/foo").mock(
+    respx.get("https://client-api.caissallc.com/v1/foo").mock(
         return_value=httpx.Response(200, json={"hello": "world"})
     )
     r = client.get(
         "/api/v1/integrations/caissa/probe",
-        params={"path": "/api/v1/foo"},
+        params={"path": "/v1/foo"},
         headers={"X-Caissa-Token": token},
     )
     assert r.status_code == 200, r.text
@@ -84,7 +84,7 @@ def test_list_benchmarks_tolerant_shape(client) -> None:
     _register(client)
     token = _fake_jwt()
     # Mock returns shape {"items": [...]}, parser should pull out the list.
-    respx.get("https://client-api.caissallc.com/api/v1/benchmarks").mock(
+    respx.get("https://client-api.caissallc.com/v1/benchmarks").mock(
         return_value=httpx.Response(
             200,
             json={
@@ -111,7 +111,7 @@ def test_import_benchmark_persists(client) -> None:
     _register(client)
     token = _fake_jwt()
     respx.get(
-        "https://client-api.caissallc.com/api/v1/benchmarks/SPX_TR/returns"
+        "https://client-api.caissallc.com/v1/benchmarks/SPX_TR/returns"
     ).mock(
         return_value=httpx.Response(
             200,
@@ -154,7 +154,7 @@ def test_import_benchmark_handles_unknown_shape(client) -> None:
     _register(client)
     token = _fake_jwt()
     respx.get(
-        "https://client-api.caissallc.com/api/v1/benchmarks/MYSTERY/returns"
+        "https://client-api.caissallc.com/v1/benchmarks/MYSTERY/returns"
     ).mock(
         return_value=httpx.Response(200, json={"some": "weird shape", "no": "items"})
     )
@@ -170,7 +170,7 @@ def test_import_benchmark_handles_unknown_shape(client) -> None:
 def test_proxy_handles_401(client) -> None:
     _register(client)
     token = _fake_jwt()
-    respx.get("https://client-api.caissallc.com/api/v1/benchmarks").mock(
+    respx.get("https://client-api.caissallc.com/v1/benchmarks").mock(
         return_value=httpx.Response(401, json={"detail": "expired"})
     )
     r = client.get(

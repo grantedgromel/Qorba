@@ -63,7 +63,7 @@ class CaissaProvider(BenchmarkProvider):
     # ── Public protocol ─────────────────────────────────────────────────
     def list_benchmarks(self) -> list[BenchmarkInfo]:
         # Endpoint path is provisional pending real spec inspection.
-        data = self._get("/api/v1/benchmarks")
+        data = self._get("/v1/benchmarks")
         return [
             BenchmarkInfo(
                 code=str(item["code"]),
@@ -86,7 +86,7 @@ class CaissaProvider(BenchmarkProvider):
             params["start"] = start.isoformat()
         if end:
             params["end"] = end.isoformat()
-        _ = self._get(f"/api/v1/benchmarks/{code}/returns", params=params)
+        _ = self._get(f"/v1/benchmarks/{code}/returns", params=params)
         # Shape unknown until first real call. Punt parsing into Sprint 2.5.
         raise NotImplementedError(
             "CaissaProvider response parsing is unwritten — wire up after the first "
