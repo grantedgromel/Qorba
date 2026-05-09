@@ -74,9 +74,9 @@ export default function CaissaSettingsPage() {
   return (
     <div className="container max-w-3xl space-y-6 py-12">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-wider text-muted">Integration</p>
+        <p className="text-xs uppercase tracking-wider text-ink-2">Integration</p>
         <h1 className="text-2xl font-semibold tracking-tight">Caissa</h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-ink-2">
           Bridge mode: paste a Caissa access token from the Swagger UI. Qorba
           uses it to read benchmarks via your tenant. Tokens expire ~6 minutes
           after they&apos;re issued.
@@ -85,7 +85,7 @@ export default function CaissaSettingsPage() {
 
       <Card>
         <CardContent className="space-y-3 p-6">
-          <ol className="space-y-1 text-sm text-muted">
+          <ol className="space-y-1 text-sm text-ink-2">
             <li>
               1. Open{" "}
               <a
@@ -106,7 +106,7 @@ export default function CaissaSettingsPage() {
             onChange={(e) => setPasted(e.target.value)}
             rows={4}
             placeholder="eyJhbGciOiJSUzI1NiIs…"
-            className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-xs text-fg placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+            className="w-full rounded-md border border-line bg-bg-1 px-3 py-2 font-mono text-xs text-ink-0 placeholder:text-ink-2 focus:outline-none focus:ring-1 focus:ring-accent"
           />
           <div className="flex items-center gap-2">
             <Button onClick={save}>Save token</Button>
@@ -114,7 +114,7 @@ export default function CaissaSettingsPage() {
               Clear
             </Button>
           </div>
-          {error && <p className="text-sm text-negative">{error}</p>}
+          {error && <p className="text-sm text-neg">{error}</p>}
         </CardContent>
       </Card>
 
@@ -122,17 +122,17 @@ export default function CaissaSettingsPage() {
         <CardContent className="space-y-3 p-6">
           <h2 className="text-sm font-semibold">Status</h2>
           {!status || !status.connected ? (
-            <p className="text-sm text-muted">Not connected.</p>
+            <p className="text-sm text-ink-2">Not connected.</p>
           ) : (
             <dl className="grid grid-cols-2 gap-2 text-sm">
-              <dt className="text-muted">Tenant</dt>
-              <dd className="font-mono text-fg">{status.tenant_id ?? "—"}</dd>
-              <dt className="text-muted">User</dt>
-              <dd className="font-mono text-fg">{status.user_email ?? "—"}</dd>
-              <dt className="text-muted">Expires in</dt>
-              <dd className="font-mono text-fg">{expiresInMin}m</dd>
-              <dt className="text-muted">Scopes</dt>
-              <dd className="font-mono text-fg">{status.scopes.join(" ")}</dd>
+              <dt className="text-ink-2">Tenant</dt>
+              <dd className="font-mono text-ink-0">{status.tenant_id ?? "—"}</dd>
+              <dt className="text-ink-2">User</dt>
+              <dd className="font-mono text-ink-0">{status.user_email ?? "—"}</dd>
+              <dt className="text-ink-2">Expires in</dt>
+              <dd className="font-mono text-ink-0">{expiresInMin}m</dd>
+              <dt className="text-ink-2">Scopes</dt>
+              <dd className="font-mono text-ink-0">{status.scopes.join(" ")}</dd>
             </dl>
           )}
         </CardContent>
@@ -141,7 +141,7 @@ export default function CaissaSettingsPage() {
       <Card>
         <CardContent className="space-y-3 p-6">
           <h2 className="text-sm font-semibold">Probe an endpoint</h2>
-          <p className="text-xs text-muted">
+          <p className="text-xs text-ink-2">
             Caissa endpoint paths aren&apos;t finalised. Try one from the
             Swagger UI here to confirm it works with your token before we
             wire it up properly.
@@ -150,14 +150,14 @@ export default function CaissaSettingsPage() {
             <input
               value={probePath}
               onChange={(e) => setProbePath(e.target.value)}
-              className="flex-1 rounded-md border border-border bg-surface px-3 py-2 font-mono text-xs text-fg focus:outline-none focus:ring-1 focus:ring-accent"
+              className="flex-1 rounded-md border border-line bg-bg-1 px-3 py-2 font-mono text-xs text-ink-0 focus:outline-none focus:ring-1 focus:ring-accent"
             />
             <Button onClick={probe} disabled={busy || !status?.connected}>
               {busy ? "Probing…" : "Probe"}
             </Button>
           </div>
           {probeBody && (
-            <pre className="max-h-64 overflow-auto rounded-md border border-border bg-elevated p-3 font-mono text-xs text-fg">
+            <pre className="max-h-64 overflow-auto rounded-md border border-line bg-bg-2 p-3 font-mono text-xs text-ink-0">
               {probeBody}
             </pre>
           )}

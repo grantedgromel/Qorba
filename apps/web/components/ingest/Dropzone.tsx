@@ -34,8 +34,8 @@ export function Dropzone({ onFile, accept = ".csv", disabled, hint }: DropzonePr
       onDragLeave={() => setHover(false)}
       onDrop={onDrop}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-surface px-8 py-16 text-center transition-colors",
-        hover && "border-accent bg-elevated",
+        "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-line bg-bg-1 px-8 py-16 text-center transition-colors",
+        hover && "border-accent bg-bg-2",
         disabled && "pointer-events-none opacity-50",
       )}
     >
@@ -51,7 +51,7 @@ export function Dropzone({ onFile, accept = ".csv", disabled, hint }: DropzonePr
         }}
       />
       <p className="text-base font-medium">Drop a returns file</p>
-      <p className="text-sm text-muted">
+      <p className="text-sm text-ink-2">
         {hint ?? `${accept.toUpperCase()} accepted`}
       </p>
     </label>

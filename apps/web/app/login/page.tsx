@@ -27,18 +27,24 @@ export default function LoginPage() {
       setError(typeof err.detail === "string" ? err.detail : "Sign-in failed");
       return;
     }
-    router.push("/analyses/new");
+    router.push("/dashboard");
   }
 
   return (
-    <main className="container flex min-h-screen items-center justify-center py-24">
-      <form onSubmit={onSubmit} className="w-full max-w-sm space-y-4 rounded-lg border border-border bg-surface p-6">
-        <div>
-          <h1 className="text-xl font-semibold">Sign in</h1>
-        </div>
+    <main className="flex min-h-screen items-center justify-center px-6 py-24">
+      <form onSubmit={onSubmit} className="card w-full max-w-sm space-y-4 p-6">
+        <h1 className="text-lg font-medium" style={{ letterSpacing: "-0.012em" }}>
+          Sign in
+        </h1>
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
@@ -50,11 +56,15 @@ export default function LoginPage() {
             required
           />
         </div>
-        {error && <p className="text-sm text-negative">{error}</p>}
+        {error && (
+          <p className="text-xs" style={{ color: "var(--neg)" }}>
+            {error}
+          </p>
+        )}
         <Button type="submit" className="w-full" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </Button>
-        <p className="text-center text-sm text-muted">
+        <p className="text-center text-xs" style={{ color: "var(--ink-2)" }}>
           New here?{" "}
           <Link href="/register" className="text-accent hover:underline">
             Create an account

@@ -68,7 +68,7 @@ export default function NewAnalysisPage() {
     <div className="container max-w-2xl py-16">
       <div className="mb-8 space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">New analysis</h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-ink-2">
           Drop a CSV, Excel, or PDF tearsheet — or paste a table. You&apos;ll
           confirm what got parsed before it&apos;s saved.
         </p>
@@ -99,7 +99,7 @@ export default function NewAnalysisPage() {
                 value={pasteName}
                 onChange={(e) => setPasteName(e.target.value)}
                 placeholder="Manager name"
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                className="w-full rounded-md border border-line bg-bg-1 px-3 py-2 text-sm text-ink-0 placeholder:text-ink-2 focus:outline-none focus:ring-1 focus:ring-accent"
                 disabled={busy}
               />
               <textarea
@@ -107,7 +107,7 @@ export default function NewAnalysisPage() {
                 onChange={(e) => setPasted(e.target.value)}
                 rows={10}
                 placeholder={`date,return\n2024-01-31,1.23\n2024-02-29,-0.45`}
-                className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-fg placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                className="w-full rounded-md border border-line bg-bg-1 px-3 py-2 font-mono text-sm text-ink-0 placeholder:text-ink-2 focus:outline-none focus:ring-1 focus:ring-accent"
                 disabled={busy}
               />
               <Button onClick={handlePaste} disabled={busy}>
@@ -116,9 +116,9 @@ export default function NewAnalysisPage() {
             </div>
           )}
           {busy && mode === "file" && (
-            <p className="text-sm text-muted">Parsing…</p>
+            <p className="text-sm text-ink-2">Parsing…</p>
           )}
-          {error && <p className="text-sm text-negative">{error}</p>}
+          {error && <p className="text-sm text-neg">{error}</p>}
         </CardContent>
       </Card>
     </div>
