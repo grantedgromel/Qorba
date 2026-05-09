@@ -141,7 +141,7 @@ export default function ConfirmDraftPage({
   if (error && !draft) {
     return (
       <div className="container max-w-3xl py-16">
-        <p className="text-sm text-negative">{error}</p>
+        <p className="text-sm text-neg">{error}</p>
       </div>
     );
   }
@@ -149,7 +149,7 @@ export default function ConfirmDraftPage({
   if (!draft) {
     return (
       <div className="container max-w-3xl py-16">
-        <p className="text-sm text-muted">Loading parsed result…</p>
+        <p className="text-sm text-ink-2">Loading parsed result…</p>
       </div>
     );
   }
@@ -164,17 +164,17 @@ export default function ConfirmDraftPage({
   return (
     <div className="container max-w-5xl space-y-6 py-12">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-wider text-muted">
+        <p className="text-xs uppercase tracking-wider text-ink-2">
           Confirm parsed returns
         </p>
         <div className="flex items-center justify-between gap-4">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full max-w-md bg-transparent text-2xl font-semibold tracking-tight text-fg outline-none placeholder:text-muted"
+            className="w-full max-w-md bg-transparent text-2xl font-semibold tracking-tight text-ink-0 outline-none placeholder:text-ink-2"
             placeholder="Manager name"
           />
-          <div className="text-right text-xs text-muted">
+          <div className="text-right text-xs text-ink-2">
             <div>Parsed by {tierLabel}</div>
             <div>Confidence {(draft.confidence * 100).toFixed(0)}%</div>
           </div>
@@ -185,7 +185,7 @@ export default function ConfirmDraftPage({
         <CardContent className="space-y-4 p-6">
           <Sparkline values={decimalPreview} />
           <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted">Values are:</span>
+            <span className="text-ink-2">Values are:</span>
             <Segmented<Scale>
               value={scale}
               onChange={setScale}
@@ -195,13 +195,13 @@ export default function ConfirmDraftPage({
               ]}
             />
             {scale !== draft.detected_scale && (
-              <span className="text-xs text-muted">
+              <span className="text-xs text-ink-2">
                 (we guessed {draft.detected_scale})
               </span>
             )}
           </div>
           {draft.warnings.length > 0 && (
-            <ul className="space-y-1 text-xs text-muted">
+            <ul className="space-y-1 text-xs text-ink-2">
               {draft.warnings.map((w, i) => (
                 <li key={i}>• {w}</li>
               ))}
@@ -217,7 +217,7 @@ export default function ConfirmDraftPage({
         scale={scale}
       />
 
-      {error && <p className="text-sm text-negative">{error}</p>}
+      {error && <p className="text-sm text-neg">{error}</p>}
 
       <div className="flex items-center justify-end gap-3">
         <Button variant="ghost" onClick={() => router.push("/analyses/new")}>

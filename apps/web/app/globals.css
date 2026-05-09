@@ -2,32 +2,253 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Qorba design tokens — adapted from the Claude Design handoff.
+ * OkLCH colors, two type families (Onest body, JetBrains Mono numbers,
+ * Instrument Serif reserved for editorial moments). Fonts come in via
+ * next/font in app/layout.tsx; these vars get composed there.
+ */
+
 @layer base {
-  :root {
-    --bg: 0 0% 5%;
-    --surface: 0 0% 8%;
-    --elevated: 0 0% 12%;
-    --border: 0 0% 18%;
-    --muted: 0 0% 50%;
-    --fg: 0 0% 96%;
-    --accent: 234 89% 74%;
-    --positive: 145 63% 49%;
-    --negative: 0 84% 60%;
+  :root,
+  [data-theme="dark"] {
+    /* spacing */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-10: 40px;
+    --sp-12: 48px;
+
+    /* radius */
+    --r-1: 4px;
+    --r-2: 6px;
+    --r-3: 10px;
+    --r-4: 14px;
+
+    /* accent */
+    --accent: oklch(0.80 0.17 155);
+    --accent-soft: oklch(0.80 0.17 155 / 0.12);
+    --accent-line: oklch(0.80 0.17 155 / 0.30);
+    --accent-ink: oklch(0.18 0.02 240);
+
+    /* semantic */
+    --pos: oklch(0.80 0.17 155);
+    --neg: oklch(0.66 0.21 22);
+    --warn: oklch(0.78 0.16 80);
+    --info: oklch(0.70 0.14 245);
+
+    /* surfaces (dark default) */
+    --bg-0: oklch(0.155 0.006 250);
+    --bg-1: oklch(0.190 0.006 250);
+    --bg-2: oklch(0.225 0.006 250);
+    --bg-3: oklch(0.265 0.006 250);
+    --bg-inset: oklch(0.130 0.006 250);
+    --line: oklch(0.295 0.008 250);
+    --line-soft: oklch(0.235 0.006 250);
+
+    /* ink */
+    --ink-0: oklch(0.985 0.003 250);
+    --ink-1: oklch(0.760 0.005 250);
+    --ink-2: oklch(0.560 0.006 250);
+    --ink-3: oklch(0.420 0.006 250);
+
+    --grid: oklch(0.260 0.006 250 / 0.7);
+
+    --duration-1: 120ms;
+    --duration-2: 220ms;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  html {
-    background-color: hsl(var(--bg));
-    color: hsl(var(--fg));
+  [data-theme="light"] {
+    --bg-0: oklch(0.985 0.003 250);
+    --bg-1: oklch(1 0 250);
+    --bg-2: oklch(0.965 0.004 250);
+    --bg-3: oklch(0.940 0.005 250);
+    --bg-inset: oklch(0.965 0.004 250);
+    --line: oklch(0.890 0.005 250);
+    --line-soft: oklch(0.935 0.004 250);
+    --ink-0: oklch(0.180 0.012 250);
+    --ink-1: oklch(0.420 0.010 250);
+    --ink-2: oklch(0.580 0.008 250);
+    --ink-3: oklch(0.700 0.007 250);
+    --grid: oklch(0.880 0.005 250 / 0.7);
+    --accent: oklch(0.58 0.16 155);
+    --accent-soft: oklch(0.58 0.16 155 / 0.10);
+    --accent-line: oklch(0.58 0.16 155 / 0.32);
+    --pos: oklch(0.55 0.17 155);
+    --neg: oklch(0.55 0.21 22);
   }
 
+  html,
   body {
-    @apply font-sans antialiased;
-    font-feature-settings:
-      "tnum" 1,
-      "cv11" 1;
+    background: var(--bg-0);
+    color: var(--ink-0);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-size: 13px;
+    line-height: 1.45;
+    letter-spacing: -0.005em;
+    transition:
+      background var(--duration-2) var(--ease),
+      color var(--duration-2) var(--ease);
   }
 
-  .tabular {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--line);
+    border-radius: 10px;
+    border: 2px solid var(--bg-0);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--ink-3);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-feature-settings:
+      "tnum",
+      "zero";
+    letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  .card {
+    background: var(--bg-1);
+    border: 1px solid var(--line);
+    border-radius: var(--r-3);
+    position: relative;
+  }
+
+  .hairline {
+    background: var(--line);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--ink-1);
+    background: transparent;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .chip-pos {
+    color: var(--pos);
+    border-color: color-mix(in oklab, var(--pos) 35%, var(--line));
+    background: color-mix(in oklab, var(--pos) 8%, transparent);
+  }
+  .chip-neg {
+    color: var(--neg);
+    border-color: color-mix(in oklab, var(--neg) 35%, var(--line));
+    background: color-mix(in oklab, var(--neg) 8%, transparent);
+  }
+  .chip-accent {
+    color: var(--accent);
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+  }
+
+  .seg {
+    display: inline-flex;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-2);
+    padding: 2px;
+    gap: 0;
+  }
+  .seg-btn {
+    height: 24px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-1);
+    border-radius: calc(var(--r-2) - 2px);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+  }
+  .seg-btn:hover {
+    color: var(--ink-0);
+  }
+  .seg-btn.active {
+    background: var(--bg-0);
+    color: var(--ink-0);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+
+  .kpi-value {
+    font-family: var(--font-mono);
+    font-feature-settings:
+      "tnum",
+      "zero";
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    color: var(--ink-0);
+    line-height: 1.05;
+  }
+  .kpi-value-lg {
+    font-size: 40px;
+    letter-spacing: -0.03em;
+  }
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+}
+
+@layer utilities {
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .page-enter {
+    animation: fade-up 280ms var(--ease) both;
   }
 }

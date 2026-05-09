@@ -1,5 +1,4 @@
-"""Analysis create/result schemas. Sprint 1 covers the minimum-viable shape:
-one fund, no benchmark, no peer group, returns one named metric."""
+"""Analysis create/result schemas."""
 
 from datetime import date, datetime
 from uuid import UUID
@@ -43,8 +42,18 @@ class MetricValue(BaseModel):
     formatted: str
 
 
+class TimeSeriesPoint(BaseModel):
+    period: date
+    value: float
+
+
 class AnalysisResult(BaseModel):
     analysis_id: UUID
     metrics: dict[str, MetricValue]
+    monthly_returns: list[TimeSeriesPoint]
+    cumulative_growth: list[TimeSeriesPoint]
+    fund_name: str
+    inception: date
+    last_observation: date
     computed_at: datetime
     version_hash: str

@@ -16,31 +16,19 @@ export function Segmented<T extends string>({
   className,
 }: SegmentedProps<T>) {
   return (
-    <div
-      role="radiogroup"
-      className={cn(
-        "inline-flex items-center gap-1 rounded-md border border-border bg-surface p-0.5",
-        className,
-      )}
-    >
-      {options.map((opt) => {
-        const active = opt.value === value;
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            role="radio"
-            aria-checked={active}
-            onClick={() => onChange(opt.value)}
-            className={cn(
-              "rounded-[5px] px-3 py-1 text-sm transition-colors",
-              active ? "bg-elevated text-fg" : "text-muted hover:text-fg",
-            )}
-          >
-            {opt.label}
-          </button>
-        );
-      })}
+    <div role="radiogroup" className={cn("seg", className)}>
+      {options.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          role="radio"
+          aria-checked={opt.value === value}
+          onClick={() => onChange(opt.value)}
+          className={cn("seg-btn", opt.value === value && "active")}
+        >
+          {opt.label}
+        </button>
+      ))}
     </div>
   );
 }

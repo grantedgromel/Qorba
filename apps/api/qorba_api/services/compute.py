@@ -1,6 +1,8 @@
 """Bridge between API selections and the Travers analytics core.
 
-Sprint 1 supports a small subset of metrics. The catalog grows in Sprint 3.
+Sprint 2+: alongside the metric grid, the result also carries the full
+monthly_returns and cumulative_growth time series, so the frontend can
+render a hero chart + month strip without re-fetching the fund.
 """
 
 from __future__ import annotations
@@ -15,13 +17,25 @@ import pandas as pd
 
 from qorba_api.core.analytics import absolute_return as ar
 from qorba_api.core.analytics import absolute_risk as risk
-from qorba_api.schemas.analyses import AnalysisResult, MetricValue
+from qorba_api.schemas.analyses import (
+    AnalysisResult,
+    MetricValue,
+    TimeSeriesPoint,
+)
 from qorba_api.schemas.returns import ReturnSeries
 from qorba_api.services.series import dto_to_series
 
 
-def _fmt_pct(x: float | None) -> str:
-    return "—" if x is None else f"{x * 100:.2f}%"
+def _fmt_pct(x: float | None, *, signed: bool = False) -> str:
+    if x is None:
+        return "—"
+    val = x * 100
+    sign = "+" if signed and val > 0 else ""
+    return f"{sign}{val:.2f}%"
+
+
+def _fmt_pct_signed(x: float | None) -> str:
+    return _fmt_pct(x, signed=True)
 
 
 def _fmt_ratio(x: float | None) -> str:
@@ -59,7 +73,37 @@ METRIC_REGISTRY: dict[str, dict] = {
         "fn": lambda s, ctx: risk.win_rate(s),
         "format": _fmt_pct,
     },
+    "best_month": {
+        "label": "Best Month",
+        "fn": lambda s, ctx: float(s.max()) if len(s) else None,
+        "format": _fmt_pct_signed,
+    },
+    "worst_month": {
+        "label": "Worst Month",
+        "fn": lambda s, ctx: float(s.min()) if len(s) else None,
+        "format": _fmt_pct_signed,
+    },
+    "avg_gain": {
+        "label": "Average Gain",
+        "fn": lambda s, ctx: risk.avg_gain(s),
+        "format": _fmt_pct_signed,
+    },
+    "avg_loss": {
+        "label": "Average Loss",
+        "fn": lambda s, ctx: risk.avg_loss(s),
+        "format": _fmt_pct_signed,
+    },
 }
+
+
+def _cumulative_growth(series: pd.Series, base: float = 100.0) -> list[TimeSeriesPoint]:
+    if series.empty:
+        return []
+    growth = (1 + series).cumprod() * base
+    return [
+        TimeSeriesPoint(period=pd.Timestamp(idx).date(), value=float(v))
+        for idx, v in growth.items()
+    ]
 
 
 def compute_analysis(
@@ -91,6 +135,12 @@ def compute_analysis(
             formatted=spec["format"](value),
         )
 
+    monthly = [
+        TimeSeriesPoint(period=pd.Timestamp(idx).date(), value=float(v))
+        for idx, v in s.items()
+    ]
+    growth = _cumulative_growth(s)
+
     payload = {
         "fund_checksum": fund_series.checksum,
         "metric_ids": sorted(metric_ids),
@@ -104,6 +154,11 @@ def compute_analysis(
     return AnalysisResult(
         analysis_id=analysis_id,
         metrics=metrics,
+        monthly_returns=monthly,
+        cumulative_growth=growth,
+        fund_name=fund_series.name,
+        inception=fund_series.inception,
+        last_observation=fund_series.last_observation,
         computed_at=datetime.now(UTC),
         version_hash=version_hash,
     )

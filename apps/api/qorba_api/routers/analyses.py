@@ -36,6 +36,19 @@ def _to_out(a: Analysis) -> AnalysisOut:
     )
 
 
+@router.get("", response_model=list[AnalysisOut])
+def list_analyses(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> list[AnalysisOut]:
+    rows = db.scalars(
+        select(Analysis)
+        .where(Analysis.user_id == user.id)
+        .order_by(Analysis.created_at.desc())
+    ).all()
+    return [_to_out(r) for r in rows]
+
+
 @router.post("", response_model=AnalysisOut, status_code=status.HTTP_201_CREATED)
 def create_analysis(
     body: AnalysisCreate,

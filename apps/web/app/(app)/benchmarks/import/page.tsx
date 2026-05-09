@@ -62,9 +62,9 @@ export default function CaissaImportPage() {
   return (
     <div className="container max-w-3xl space-y-6 py-12">
       <div className="space-y-1">
-        <p className="text-xs uppercase tracking-wider text-muted">Benchmarks</p>
+        <p className="text-xs uppercase tracking-wider text-ink-2">Benchmarks</p>
         <h1 className="text-2xl font-semibold tracking-tight">Import from Caissa</h1>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-ink-2">
           Pick benchmarks from your Caissa tenant. Each import persists the
           monthly returns into Qorba so you don&apos;t need a fresh token next
           time.
@@ -74,7 +74,7 @@ export default function CaissaImportPage() {
       {!hasToken && (
         <Card>
           <CardContent className="space-y-3 p-6">
-            <p className="text-sm text-fg">No Caissa token in this session.</p>
+            <p className="text-sm text-ink-0">No Caissa token in this session.</p>
             <Button asChild>
               <Link href="/settings/caissa">Connect Caissa</Link>
             </Button>
@@ -91,9 +91,9 @@ export default function CaissaImportPage() {
                 {busy ? "Loading…" : "Refresh"}
               </Button>
             </div>
-            {error && <p className="text-sm text-negative">{error}</p>}
+            {error && <p className="text-sm text-neg">{error}</p>}
             {items.length === 0 && !busy && !error && (
-              <p className="text-sm text-muted">
+              <p className="text-sm text-ink-2">
                 No benchmarks listed. Endpoint paths inside Caissa aren&apos;t
                 finalised — try the probe at{" "}
                 <Link href="/settings/caissa" className="text-accent hover:underline">
@@ -102,14 +102,14 @@ export default function CaissaImportPage() {
                 to discover the right path.
               </p>
             )}
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-line">
               {items.map((item) => {
                 const st = state[item.code] ?? "idle";
                 return (
                   <li key={item.code} className="flex items-center justify-between py-3">
                     <div>
-                      <div className="font-medium text-fg">{item.name ?? item.code}</div>
-                      <div className="font-mono text-xs text-muted">
+                      <div className="font-medium text-ink-0">{item.name ?? item.code}</div>
+                      <div className="font-mono text-xs text-ink-2">
                         {item.code}
                         {item.category ? ` · ${item.category}` : ""}
                       </div>

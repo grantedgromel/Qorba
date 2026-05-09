@@ -65,13 +65,13 @@ export function ReturnGrid({ points, edits, onEdit, scale }: ReturnGridProps) {
   const [focused, setFocused] = useState<string | null>(null);
 
   if (rows.length === 0) {
-    return <p className="text-sm text-muted">No data points to display.</p>;
+    return <p className="text-sm text-ink-2">No data points to display.</p>;
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border border-border">
+    <div className="overflow-x-auto rounded-md border border-line">
       <table className="w-full font-mono text-xs tabular">
-        <thead className="bg-elevated text-muted">
+        <thead className="bg-bg-2 text-ink-2">
           <tr>
             <th className="px-2 py-2 text-left text-[10px] font-medium uppercase tracking-wider">
               Year
@@ -88,8 +88,8 @@ export function ReturnGrid({ points, edits, onEdit, scale }: ReturnGridProps) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.year} className="border-t border-border">
-              <td className="px-2 py-1 text-fg">{row.year}</td>
+            <tr key={row.year} className="border-t border-line">
+              <td className="px-2 py-1 text-ink-0">{row.year}</td>
               {row.months.map((cell, idx) => {
                 const period = `${row.year}-${String(idx + 1).padStart(2, "0")}-01`;
                 const formatted = formatCell(cell, scale);
@@ -102,9 +102,9 @@ export function ReturnGrid({ points, edits, onEdit, scale }: ReturnGridProps) {
                       onBlur={() => setFocused(null)}
                       onChange={(e) => onEdit(period, e.target.value)}
                       className={cn(
-                        "w-full bg-transparent px-1 py-1 text-right text-fg outline-none",
-                        isFocused && "rounded-sm bg-elevated ring-1 ring-accent",
-                        cell === null && !isFocused && "text-muted",
+                        "w-full bg-transparent px-1 py-1 text-right text-ink-0 outline-none",
+                        isFocused && "rounded-sm bg-bg-2 ring-1 ring-accent",
+                        cell === null && !isFocused && "text-ink-2",
                       )}
                       placeholder="—"
                       inputMode="decimal"

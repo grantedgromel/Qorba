@@ -363,7 +363,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Analyses */
+        get: operations["list_analyses_api_v1_analyses_get"];
         put?: never;
         /** Create Analysis */
         post: operations["create_analysis_api_v1_analyses_post"];
@@ -471,6 +472,22 @@ export interface components {
             metrics: {
                 [key: string]: components["schemas"]["MetricValue"];
             };
+            /** Monthly Returns */
+            monthly_returns: components["schemas"]["TimeSeriesPoint"][];
+            /** Cumulative Growth */
+            cumulative_growth: components["schemas"]["TimeSeriesPoint"][];
+            /** Fund Name */
+            fund_name: string;
+            /**
+             * Inception
+             * Format: date
+             */
+            inception: string;
+            /**
+             * Last Observation
+             * Format: date
+             */
+            last_observation: string;
             /**
              * Computed At
              * Format: date-time
@@ -764,6 +781,16 @@ export interface components {
             source: "csv" | "xlsx" | "pdf_tier1" | "pdf_tier2" | "pdf_tier3" | "paste" | "library";
             /** Checksum */
             checksum: string;
+        };
+        /** TimeSeriesPoint */
+        TimeSeriesPoint: {
+            /**
+             * Period
+             * Format: date
+             */
+            period: string;
+            /** Value */
+            value: number;
         };
         /** TokenStatus */
         TokenStatus: {
@@ -1459,6 +1486,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BenchmarkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_analyses_api_v1_analyses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalysisOut"][];
                 };
             };
             /** @description Validation Error */
