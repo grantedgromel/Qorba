@@ -26,9 +26,14 @@ class Settings(BaseSettings):
     session_max_age_seconds: int = 60 * 60 * 24 * 30
 
     allow_registration: bool = True
+    run_migrations_on_startup: bool = True
 
-    caissa_api_key: str | None = None
+    caissa_client_id: str | None = None
+    caissa_client_secret: str | None = None
     caissa_base_url: str = "https://client-api.caissallc.com"
+    caissa_auth_url: str = "https://platform-login.caissallc.com"
+    caissa_token_url: str = "https://platform-login.caissallc.com/connect/token"
+    caissa_redirect_uri: str = "http://localhost:3000/auth/caissa/callback"
 
     anthropic_api_key: str | None = None
     max_llm_cost_per_upload_usd: float = 0.50

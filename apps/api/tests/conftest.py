@@ -16,6 +16,8 @@ os.environ["QORBA_ENV"] = "test"
 os.environ["QORBA_DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
 os.environ["QORBA_SESSION_SECRET"] = "test-secret-32-bytes-aaaaaaaaaaaaa"
 os.environ["QORBA_ALLOW_REGISTRATION"] = "true"
+# Skip Alembic on startup; tests use Base.metadata.create_all on an in-memory engine.
+os.environ["QORBA_RUN_MIGRATIONS_ON_STARTUP"] = "false"
 
 from qorba_api.db.models import Base
 from qorba_api.db.session import get_db
