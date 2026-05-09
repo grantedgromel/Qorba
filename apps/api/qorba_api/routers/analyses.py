@@ -16,6 +16,7 @@ from qorba_api.schemas.analyses import (
     AnalysisOut,
     AnalysisResult,
     MetricSelection,
+    Period,
 )
 from qorba_api.schemas.returns import ReturnSeries
 from qorba_api.services.compute import compute_analysis
@@ -91,9 +92,16 @@ def get_analysis(
 @router.post("/{analysis_id}/compute", response_model=AnalysisResult)
 def compute(
     analysis_id: UUID,
+    period: Period = "ALL",
+    metric_ids: str | None = None,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> AnalysisResult:
+    """Compute the analysis for a given period and (optionally) metric override.
+
+    `metric_ids` is a comma-separated override; if absent, the analysis's
+    saved selection is used.
+    """
     a = db.scalar(
         select(Analysis).where(Analysis.id == analysis_id, Analysis.user_id == user.id)
     )
@@ -105,10 +113,16 @@ def compute(
 
     series = ReturnSeries.model_validate(fund.series)
     sel = a.selection or {}
+    if metric_ids:
+        chosen = [m.strip() for m in metric_ids.split(",") if m.strip()]
+    else:
+        chosen = sel.get("metric_ids", ["sharpe"])
     return compute_analysis(
         analysis_id=a.id,
         fund_series=series,
-        metric_ids=sel.get("metric_ids", ["sharpe"]),
+        metric_ids=chosen,
+        period=period,
         rf_annual=float(sel.get("rf_annual", 0.0)),
         mar_annual=float(sel.get("mar_annual", 0.0)),
+        omega_threshold=float(sel.get("omega_threshold", 0.0)),
     )

@@ -1,9 +1,12 @@
 """Analysis create/result schemas."""
 
 from datetime import date, datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+Period = Literal["3M", "6M", "YTD", "1Y", "3Y", "5Y", "ALL"]
 
 
 class FundOut(BaseModel):
@@ -55,5 +58,18 @@ class AnalysisResult(BaseModel):
     fund_name: str
     inception: date
     last_observation: date
+    period: Period
     computed_at: datetime
     version_hash: str
+
+
+class MetricCatalogEntry(BaseModel):
+    id: str
+    label: str
+    group: str
+    default: bool
+    requires_benchmark: bool
+
+
+class MetricCatalog(BaseModel):
+    items: list[MetricCatalogEntry]

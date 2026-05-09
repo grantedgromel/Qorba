@@ -19,6 +19,7 @@ from qorba_api.routers import (
     funds,
     health,
     ingest,
+    metrics,
 )
 from qorba_api.settings import get_settings
 
@@ -62,6 +63,7 @@ def create_app() -> FastAPI:
     app.include_router(benchmarks.router, prefix=api_v1)
     app.include_router(caissa.router, prefix=api_v1)
     app.include_router(analyses.router, prefix=api_v1)
+    app.include_router(metrics.router, prefix=api_v1)
 
     return app
 

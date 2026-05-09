@@ -13,6 +13,8 @@ interface TimeSeriesPoint {
   value: number;
 }
 
+export type Period = "3M" | "6M" | "YTD" | "1Y" | "3Y" | "5Y" | "ALL";
+
 export interface AnalysisResult {
   analysis_id: string;
   metrics: Record<string, MetricValue>;
@@ -21,35 +23,73 @@ export interface AnalysisResult {
   fund_name: string;
   inception: string;
   last_observation: string;
+  period: Period;
   computed_at: string;
   version_hash: string;
 }
 
-async function compute(id: string, cookieHeader: string): Promise<AnalysisResult> {
-  const apiUrl = process.env.API_URL ?? "http://localhost:8000";
-  const r = await fetch(`${apiUrl}/api/v1/analyses/${id}/compute`, {
-    method: "POST",
+export interface MetricCatalogEntry {
+  id: string;
+  label: string;
+  group: string;
+  default: boolean;
+  requires_benchmark: boolean;
+}
+
+async function fetchJson<T>(url: string, cookieHeader: string, init?: RequestInit): Promise<T> {
+  const r = await fetch(url, {
     cache: "no-store",
-    headers: { cookie: cookieHeader, "content-type": "application/json" },
-    body: "{}",
+    ...init,
+    headers: { cookie: cookieHeader, ...(init?.headers ?? {}) },
   });
   if (r.status === 401) redirect("/login");
-  if (!r.ok) throw new Error(`Compute failed: ${r.status}`);
-  return r.json();
+  if (!r.ok) throw new Error(`${r.status} ${url}`);
+  return r.json() as Promise<T>;
+}
+
+const VALID_PERIODS: Period[] = ["3M", "6M", "YTD", "1Y", "3Y", "5Y", "ALL"];
+
+function parsePeriod(raw: string | undefined): Period {
+  return VALID_PERIODS.includes(raw as Period) ? (raw as Period) : "ALL";
 }
 
 export default async function AnalysisPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ period?: string; metrics?: string }>;
 }) {
   const { id } = await params;
+  const sp = await searchParams;
+  const period = parsePeriod(sp.period);
+  const metricsParam = sp.metrics ? `&metric_ids=${encodeURIComponent(sp.metrics)}` : "";
+
   const cookieStore = await cookies();
   const cookieHeader = cookieStore
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
     .join("; ");
 
-  const result = await compute(id, cookieHeader);
-  return <AnalysisOverview result={result} />;
+  const apiUrl = process.env.API_URL ?? "http://localhost:8000";
+
+  const [result, catalog] = await Promise.all([
+    fetchJson<AnalysisResult>(
+      `${apiUrl}/api/v1/analyses/${id}/compute?period=${period}${metricsParam}`,
+      cookieHeader,
+      { method: "POST", body: "{}", headers: { "content-type": "application/json" } },
+    ),
+    fetchJson<{ items: MetricCatalogEntry[] }>(
+      `${apiUrl}/api/v1/metrics/catalog`,
+      cookieHeader,
+    ),
+  ]);
+
+  return (
+    <AnalysisOverview
+      analysisId={id}
+      initial={result}
+      catalog={catalog.items}
+    />
+  );
 }
