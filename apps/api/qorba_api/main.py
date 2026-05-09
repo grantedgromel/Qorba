@@ -11,7 +11,15 @@ from alembic.config import Config as AlembicConfig
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from qorba_api.routers import analyses, auth, benchmarks, funds, health, ingest
+from qorba_api.routers import (
+    analyses,
+    auth,
+    benchmarks,
+    caissa,
+    funds,
+    health,
+    ingest,
+)
 from qorba_api.settings import get_settings
 
 
@@ -43,7 +51,7 @@ def create_app() -> FastAPI:
         allow_origins=[settings.web_origin],
         allow_credentials=True,
         allow_methods=["*"],
-        allow_headers=["*"],
+        allow_headers=["*", "X-Caissa-Token"],
     )
 
     api_v1 = "/api/v1"
@@ -52,6 +60,7 @@ def create_app() -> FastAPI:
     app.include_router(ingest.router, prefix=api_v1)
     app.include_router(funds.router, prefix=api_v1)
     app.include_router(benchmarks.router, prefix=api_v1)
+    app.include_router(caissa.router, prefix=api_v1)
     app.include_router(analyses.router, prefix=api_v1)
 
     return app

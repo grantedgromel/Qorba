@@ -279,6 +279,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/integrations/caissa/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Status
+         * @description Decode the pasted token (no network call) and report what's in it.
+         */
+        get: operations["status__api_v1_integrations_caissa_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/probe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Probe
+         * @description Raw GET-proxy. Useful for verifying the token works and discovering
+         *     endpoint paths via Caissa's own Swagger UI.
+         *
+         *     Returns Caissa's response body unchanged (for inspection in the UI).
+         */
+        get: operations["probe_api_v1_integrations_caissa_probe_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/list-benchmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Benchmarks */
+        get: operations["list_benchmarks_api_v1_integrations_caissa_list_benchmarks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/import-benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Benchmark */
+        post: operations["import_benchmark_api_v1_integrations_caissa_import_benchmark_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/analyses": {
         parameters: {
             query?: never;
@@ -471,6 +548,15 @@ export interface components {
         Body_ingest_xlsx_api_v1_ingest_xlsx_post: {
             /** File */
             file: string;
+        };
+        /** CaissaImportRequest */
+        CaissaImportRequest: {
+            /** Code */
+            code: string;
+            /** Name */
+            name?: string | null;
+            /** Returns Path */
+            returns_path?: string | null;
         };
         /** CellEdit */
         CellEdit: {
@@ -678,6 +764,19 @@ export interface components {
             source: "csv" | "xlsx" | "pdf_tier1" | "pdf_tier2" | "pdf_tier3" | "paste" | "library";
             /** Checksum */
             checksum: string;
+        };
+        /** TokenStatus */
+        TokenStatus: {
+            /** Connected */
+            connected: boolean;
+            /** Expires In Seconds */
+            expires_in_seconds: number | null;
+            /** Tenant Id */
+            tenant_id: string | null;
+            /** User Email */
+            user_email: string | null;
+            /** Scopes */
+            scopes: string[];
         };
         /** UserOut */
         UserOut: {
@@ -1220,6 +1319,146 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status__api_v1_integrations_caissa_status_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    probe_api_v1_integrations_caissa_probe_get: {
+        parameters: {
+            query?: {
+                path?: string;
+            };
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_benchmarks_api_v1_integrations_caissa_list_benchmarks_get: {
+        parameters: {
+            query?: {
+                path?: string;
+            };
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_benchmark_api_v1_integrations_caissa_import_benchmark_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaissaImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkOut"];
                 };
             };
             /** @description Validation Error */
