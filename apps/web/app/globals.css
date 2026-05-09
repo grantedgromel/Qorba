@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: 0 0% 5%;
+    --surface: 0 0% 8%;
+    --elevated: 0 0% 12%;
+    --border: 0 0% 18%;
+    --muted: 0 0% 50%;
+    --fg: 0 0% 96%;
+    --accent: 234 89% 74%;
+    --positive: 145 63% 49%;
+    --negative: 0 84% 60%;
+  }
+
+  html {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--fg));
+  }
+
+  body {
+    @apply font-sans antialiased;
+    font-feature-settings:
+      "tnum" 1,
+      "cv11" 1;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
