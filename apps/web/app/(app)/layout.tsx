@@ -11,6 +11,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Link href="/analyses/new" className="hover:text-fg">
             New analysis
           </Link>
+          <Link href="/benchmarks/import" className="hover:text-fg">
+            Benchmarks
+          </Link>
+          <Link href="/settings/caissa" className="hover:text-fg">
+            Caissa
+          </Link>
         </nav>
       </header>
       <main className="flex-1">{children}</main>

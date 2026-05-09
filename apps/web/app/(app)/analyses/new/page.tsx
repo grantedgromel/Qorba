@@ -2,72 +2,66 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Dropzone } from "@/components/ingest/Dropzone";
 import { Card, CardContent } from "@/components/ui/card";
-import { api } from "@/lib/api/client";
+import { Dropzone } from "@/components/ingest/Dropzone";
+import { Segmented } from "@/components/ui/segmented";
+import { Button } from "@/components/ui/button";
+
+type Mode = "file" | "paste";
 
 export default function NewAnalysisPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<Mode>("file");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [stage, setStage] = useState<string>("");
+  const [pasted, setPasted] = useState("");
+  const [pasteName, setPasteName] = useState("Manager");
 
-  async function handleFile(file: File) {
+  async function postIngest(path: string, init: RequestInit) {
     setError(null);
     setBusy(true);
-
     try {
-      // 1. Ingest CSV
-      setStage("Parsing CSV…");
-      const form = new FormData();
-      form.append("file", file);
-      const ingestResp = await fetch("/api/v1/ingest/csv", {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      });
-      if (!ingestResp.ok) {
-        if (ingestResp.status === 401) {
+      const r = await fetch(path, { ...init, credentials: "include" });
+      if (!r.ok) {
+        if (r.status === 401) {
           router.push("/login");
           return;
         }
-        const body = await ingestResp.json().catch(() => ({}));
-        throw new Error(body.detail ?? "Could not parse CSV");
+        const body = await r.json().catch(() => ({}));
+        throw new Error(body.detail ?? "Ingest failed");
       }
-      const extracted = await ingestResp.json();
-
-      // Sprint 1 shortcut: skip the correction UI, persist immediately.
-      // Sprint 2 inserts <ReturnGrid> here so the user confirms pct/decimal.
-
-      // 2. Persist as a fund
-      setStage("Saving fund…");
-      const { data: fund, error: fundErr } = await api.POST("/api/v1/funds", {
-        body: extracted,
-      });
-      if (fundErr || !fund) throw new Error("Could not save fund");
-
-      // 3. Create analysis with the default Sprint 1 metric set
-      setStage("Creating analysis…");
-      const { data: analysis, error: anaErr } = await api.POST("/api/v1/analyses", {
-        body: {
-          fund_id: fund.id,
-          metrics: {
-            metric_ids: ["sharpe", "ann_return_geo", "ann_vol", "max_dd", "win_rate", "sortino"],
-          },
-          rf_annual: 0.0,
-          mar_annual: 0.0,
-          omega_threshold: 0.0,
-        },
-      });
-      if (anaErr || !analysis) throw new Error("Could not create analysis");
-
-      router.push(`/analyses/${analysis.id}`);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const draft = await r.json();
+      router.push(`/analyses/new/confirm/${draft.id}`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
     } finally {
       setBusy(false);
-      setStage("");
     }
+  }
+
+  function endpointFor(filename: string): string {
+    const lower = filename.toLowerCase();
+    if (lower.endsWith(".pdf")) return "/api/v1/ingest/pdf";
+    if (lower.endsWith(".xlsx") || lower.endsWith(".xls")) return "/api/v1/ingest/xlsx";
+    return "/api/v1/ingest/csv";
+  }
+
+  async function handleFile(file: File) {
+    const form = new FormData();
+    form.append("file", file);
+    await postIngest(endpointFor(file.name), { method: "POST", body: form });
+  }
+
+  async function handlePaste() {
+    if (!pasted.trim()) {
+      setError("Paste a date+return table first.");
+      return;
+    }
+    await postIngest("/api/v1/ingest/paste", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: pasteName || "Manager", text: pasted }),
+    });
   }
 
   return (
@@ -75,15 +69,56 @@ export default function NewAnalysisPage() {
       <div className="mb-8 space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">New analysis</h1>
         <p className="text-sm text-muted">
-          Drop a CSV with a date column and a monthly return column. The first
-          numeric column is treated as the fund return series.
+          Drop a CSV, Excel, or PDF tearsheet — or paste a table. You&apos;ll
+          confirm what got parsed before it&apos;s saved.
         </p>
       </div>
+
+      <Segmented<Mode>
+        value={mode}
+        onChange={setMode}
+        options={[
+          { value: "file", label: "Upload" },
+          { value: "paste", label: "Paste" },
+        ]}
+        className="mb-4"
+      />
+
       <Card>
-        <CardContent className="p-6">
-          <Dropzone onFile={handleFile} disabled={busy} hint="CSV with date + return columns" />
-          {busy && <p className="mt-4 text-sm text-muted">{stage}</p>}
-          {error && <p className="mt-4 text-sm text-negative">{error}</p>}
+        <CardContent className="space-y-4 p-6">
+          {mode === "file" ? (
+            <Dropzone
+              onFile={handleFile}
+              disabled={busy}
+              accept=".csv,.xlsx,.xls,.pdf"
+              hint="CSV · XLSX · PDF tearsheet"
+            />
+          ) : (
+            <div className="space-y-3">
+              <input
+                value={pasteName}
+                onChange={(e) => setPasteName(e.target.value)}
+                placeholder="Manager name"
+                className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                disabled={busy}
+              />
+              <textarea
+                value={pasted}
+                onChange={(e) => setPasted(e.target.value)}
+                rows={10}
+                placeholder={`date,return\n2024-01-31,1.23\n2024-02-29,-0.45`}
+                className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm text-fg placeholder:text-muted focus:outline-none focus:ring-1 focus:ring-accent"
+                disabled={busy}
+              />
+              <Button onClick={handlePaste} disabled={busy}>
+                {busy ? "Parsing…" : "Parse"}
+              </Button>
+            </div>
+          )}
+          {busy && mode === "file" && (
+            <p className="text-sm text-muted">Parsing…</p>
+          )}
+          {error && <p className="text-sm text-negative">{error}</p>}
         </CardContent>
       </Card>
     </div>

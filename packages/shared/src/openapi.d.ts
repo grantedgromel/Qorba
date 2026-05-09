@@ -106,6 +106,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ingest/xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ingest Xlsx */
+        post: operations["ingest_xlsx_api_v1_ingest_xlsx_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ingest Pdf */
+        post: operations["ingest_pdf_api_v1_ingest_pdf_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/paste": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ingest Paste */
+        post: operations["ingest_paste_api_v1_ingest_paste_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Draft */
+        get: operations["get_draft_api_v1_ingest_drafts__draft_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ingest/drafts/{draft_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Draft */
+        post: operations["confirm_draft_api_v1_ingest_drafts__draft_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/funds": {
         parameters: {
             query?: never;
@@ -134,6 +219,137 @@ export interface paths {
         get: operations["get_fund_api_v1_funds__fund_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/benchmarks/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Library */
+        get: operations["library_api_v1_benchmarks_library_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/benchmarks/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload */
+        post: operations["upload_api_v1_benchmarks_upload_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/benchmarks/{code}/returns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch Provider Returns
+         * @description Fetch a series from the active BenchmarkProvider (not user uploads).
+         */
+        get: operations["fetch_provider_returns_api_v1_benchmarks__code__returns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Status
+         * @description Decode the pasted token (no network call) and report what's in it.
+         */
+        get: operations["status__api_v1_integrations_caissa_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/probe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Probe
+         * @description Raw GET-proxy. Useful for verifying the token works and discovering
+         *     endpoint paths via Caissa's own Swagger UI.
+         *
+         *     Returns Caissa's response body unchanged (for inspection in the UI).
+         */
+        get: operations["probe_api_v1_integrations_caissa_probe_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/list-benchmarks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Benchmarks */
+        get: operations["list_benchmarks_api_v1_integrations_caissa_list_benchmarks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/integrations/caissa/import-benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Benchmark */
+        post: operations["import_benchmark_api_v1_integrations_caissa_import_benchmark_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -263,10 +479,94 @@ export interface components {
             /** Version Hash */
             version_hash: string;
         };
+        /** BenchmarkLibrary */
+        BenchmarkLibrary: {
+            /** Items */
+            items: components["schemas"]["BenchmarkLibraryItem"][];
+            /** Provider Active */
+            provider_active: string;
+        };
+        /** BenchmarkLibraryItem */
+        BenchmarkLibraryItem: {
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Category */
+            category: string;
+            /** Provider */
+            provider: string;
+        };
+        /** BenchmarkOut */
+        BenchmarkOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Code */
+            code: string | null;
+            /** Provider */
+            provider: string;
+            /**
+             * Inception
+             * Format: date
+             */
+            inception: string;
+            /**
+             * Last Observation
+             * Format: date
+             */
+            last_observation: string;
+            /** N Observations */
+            n_observations: number;
+        };
+        /**
+         * BenchmarkUploadFromIngest
+         * @description Promote a confirmed IngestionResult into a Benchmark.
+         */
+        BenchmarkUploadFromIngest: {
+            /** Name */
+            name: string;
+            /** Code */
+            code?: string | null;
+            series: components["schemas"]["ReturnSeries"];
+        };
         /** Body_ingest_csv_api_v1_ingest_csv_post */
         Body_ingest_csv_api_v1_ingest_csv_post: {
             /** File */
             file: string;
+        };
+        /** Body_ingest_pdf_api_v1_ingest_pdf_post */
+        Body_ingest_pdf_api_v1_ingest_pdf_post: {
+            /** File */
+            file: string;
+        };
+        /** Body_ingest_xlsx_api_v1_ingest_xlsx_post */
+        Body_ingest_xlsx_api_v1_ingest_xlsx_post: {
+            /** File */
+            file: string;
+        };
+        /** CaissaImportRequest */
+        CaissaImportRequest: {
+            /** Code */
+            code: string;
+            /** Name */
+            name?: string | null;
+            /** Returns Path */
+            returns_path?: string | null;
+        };
+        /** CellEdit */
+        CellEdit: {
+            /**
+             * Period
+             * Format: date
+             */
+            period: string;
+            /** Value */
+            value: number | null;
         };
         /**
          * ExtractedReturns
@@ -323,6 +623,72 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** IngestPasteRequest */
+        IngestPasteRequest: {
+            /**
+             * Name
+             * @default fund
+             */
+            name: string;
+            /** Text */
+            text: string;
+        };
+        /**
+         * IngestionConfirm
+         * @description User-confirmed correction to apply on /confirm.
+         *
+         *     `scale` is what the *user* says the values are. The server applies it
+         *     (decimal stays as-is, percent divides by 100) and persists a Fund.
+         */
+        IngestionConfirm: {
+            /**
+             * Scale
+             * @enum {string}
+             */
+            scale: "percent" | "decimal";
+            /** Name */
+            name?: string | null;
+            /** Edits */
+            edits?: components["schemas"]["CellEdit"][];
+        };
+        /**
+         * IngestionDraft
+         * @description A parsed-but-unconfirmed series — what /ingest/* returns.
+         */
+        IngestionDraft: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Detected Scale
+             * @enum {string}
+             */
+            detected_scale: "percent" | "decimal";
+            /**
+             * Tier Used
+             * @enum {integer}
+             */
+            tier_used: 1 | 2 | 3 | 4;
+            /** Confidence */
+            confidence: number;
+            /** Confidence Components */
+            confidence_components?: {
+                [key: string]: number;
+            };
+            /** Points */
+            points: components["schemas"]["ReturnPoint"][];
+            /** Warnings */
+            warnings?: string[];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
         };
         /** LoginRequest */
         LoginRequest: {
@@ -398,6 +764,19 @@ export interface components {
             source: "csv" | "xlsx" | "pdf_tier1" | "pdf_tier2" | "pdf_tier3" | "paste" | "library";
             /** Checksum */
             checksum: string;
+        };
+        /** TokenStatus */
+        TokenStatus: {
+            /** Connected */
+            connected: boolean;
+            /** Expires In Seconds */
+            expires_in_seconds: number | null;
+            /** Tenant Id */
+            tenant_id: string | null;
+            /** User Email */
+            user_email: string | null;
+            /** Scopes */
+            scopes: string[];
         };
         /** UserOut */
         UserOut: {
@@ -597,7 +976,182 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExtractedReturns"];
+                    "application/json": components["schemas"]["IngestionDraft"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ingest_xlsx_api_v1_ingest_xlsx_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_ingest_xlsx_api_v1_ingest_xlsx_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestionDraft"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ingest_pdf_api_v1_ingest_pdf_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_ingest_pdf_api_v1_ingest_pdf_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestionDraft"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    ingest_paste_api_v1_ingest_paste_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestPasteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestionDraft"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_draft_api_v1_ingest_drafts__draft_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestionDraft"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_draft_api_v1_ingest_drafts__draft_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestionConfirm"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FundOut"];
                 };
             };
             /** @description Validation Error */
@@ -666,6 +1220,245 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FundOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    library_api_v1_benchmarks_library_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkLibrary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_api_v1_benchmarks_upload_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BenchmarkUploadFromIngest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    fetch_provider_returns_api_v1_benchmarks__code__returns_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    status__api_v1_integrations_caissa_status_get: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenStatus"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    probe_api_v1_integrations_caissa_probe_get: {
+        parameters: {
+            query?: {
+                path?: string;
+            };
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_benchmarks_api_v1_integrations_caissa_list_benchmarks_get: {
+        parameters: {
+            query?: {
+                path?: string;
+            };
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_benchmark_api_v1_integrations_caissa_import_benchmark_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Caissa-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaissaImportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BenchmarkOut"];
                 };
             };
             /** @description Validation Error */

@@ -204,6 +204,6 @@ def extract_returns_from_pdf(file_bytes: BytesIO) -> pd.Series:
     if not all_series:
         return pd.Series(dtype=float)
 
-    # Pick the longest series (most likely the main return table)
-    best = max(all_series, key=len)
-    return _normalize_returns(best)
+    # Pick the longest series (most likely the main return table). Scale
+    # decisions (percent vs decimal) are made by the cascade + user, not here.
+    return max(all_series, key=len)
