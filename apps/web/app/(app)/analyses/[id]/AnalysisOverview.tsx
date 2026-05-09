@@ -1,16 +1,22 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { parseAsString, parseAsStringEnum, useQueryState } from "nuqs";
 import { AnimatedNumber } from "@/components/charts/AnimatedNumber";
 import { HeroChart } from "@/components/charts/HeroChart";
 import { MiniSpark } from "@/components/charts/MiniSpark";
 import { MonthStrip } from "@/components/charts/MonthStrip";
-import type { AnalysisResult } from "./page";
+import { MetricPalette } from "@/components/pickers/MetricPalette";
+import { MetricChipBar } from "@/components/pickers/MetricChipBar";
+import type {
+  AnalysisResult,
+  MetricCatalogEntry,
+  Period,
+} from "./page";
 
-const PERIODS = ["3M", "6M", "YTD", "1Y", "3Y", "5Y", "ALL"] as const;
-type Period = (typeof PERIODS)[number];
+const PERIODS: readonly Period[] = ["3M", "6M", "YTD", "1Y", "3Y", "5Y", "ALL"] as const;
 
 const fmtMonthYear = (iso: string): string =>
   new Date(iso).toLocaleString("en-US", { month: "short", year: "numeric" });
@@ -35,7 +41,9 @@ function QuietStat({ label, value, sub, spark, isUp, accent, last }: QuietStatPr
     >
       <div className="flex items-center justify-between gap-2">
         <span className="eyebrow">{label}</span>
-        {spark && spark.length > 1 && <MiniSpark values={spark} isUp={!!isUp} width={64} height={20} />}
+        {spark && spark.length > 1 && (
+          <MiniSpark values={spark} isUp={!!isUp} width={64} height={20} />
+        )}
       </div>
       <div
         className="mono"
@@ -49,9 +57,7 @@ function QuietStat({ label, value, sub, spark, isUp, accent, last }: QuietStatPr
       >
         {value}
       </div>
-      {sub && (
-        <div style={{ fontSize: 11.5, color: "var(--ink-2)", lineHeight: 1.4 }}>{sub}</div>
-      )}
+      {sub && <div style={{ fontSize: 11.5, color: "var(--ink-2)", lineHeight: 1.4 }}>{sub}</div>}
     </div>
   );
 }
@@ -82,17 +88,22 @@ function MicroStat({ label, value, accent }: MicroStatProps) {
 interface PeriodRailProps {
   period: Period;
   onPick: (p: Period) => void;
+  pending: boolean;
 }
 
-function PeriodRail({ period, onPick }: PeriodRailProps) {
+function PeriodRail({ period, onPick, pending }: PeriodRailProps) {
   return (
-    <div className="inline-flex" style={{ gap: 22 }}>
+    <div
+      className="inline-flex"
+      style={{ gap: 22, opacity: pending ? 0.6 : 1, transition: "opacity 200ms" }}
+    >
       {PERIODS.map((p) => {
         const active = p === period;
         return (
           <button
             key={p}
             onClick={() => onPick(p)}
+            disabled={pending}
             className="mono relative py-1.5"
             style={{
               fontSize: 11,
@@ -102,7 +113,7 @@ function PeriodRail({ period, onPick }: PeriodRailProps) {
               transition: "color 200ms",
               background: "transparent",
               border: 0,
-              cursor: "pointer",
+              cursor: pending ? "wait" : "pointer",
               padding: "6px 0",
             }}
           >
@@ -147,7 +158,11 @@ function Editorial({ items }: { items: EditorialItem[] }) {
   return (
     <div className="flex flex-col" style={{ gap: 26 }}>
       {items.map((it, i) => (
-        <div key={i} className="grid items-start gap-3.5" style={{ gridTemplateColumns: "14px 1fr" }}>
+        <div
+          key={i}
+          className="grid items-start gap-3.5"
+          style={{ gridTemplateColumns: "14px 1fr" }}
+        >
           <span
             aria-hidden
             className="inline-block h-1.5 w-1.5 rounded-full"
@@ -187,7 +202,86 @@ function Editorial({ items }: { items: EditorialItem[] }) {
   );
 }
 
-export function AnalysisOverview({ result }: { result: AnalysisResult }) {
+interface AnalysisOverviewProps {
+  analysisId: string;
+  initial: AnalysisResult;
+  catalog: MetricCatalogEntry[];
+}
+
+const periodParser = parseAsStringEnum<Period>([...PERIODS]).withDefault("ALL");
+
+export function AnalysisOverview({ analysisId, initial, catalog }: AnalysisOverviewProps) {
+  const [period, setPeriod] = useQueryState("period", periodParser);
+  const [metricsCsv, setMetricsCsv] = useQueryState("metrics", parseAsString);
+  const [result, setResult] = useState(initial);
+  const [pending, startTransition] = useTransition();
+
+  // Selected metric ids: URL override (?metrics=sharpe,sortino) or whatever the
+  // current result already has.
+  const selected = useMemo(
+    () =>
+      metricsCsv
+        ? metricsCsv.split(",").filter(Boolean)
+        : Object.keys(result.metrics),
+    [metricsCsv, result.metrics],
+  );
+
+  const defaultIds = useMemo(
+    () => catalog.filter((c) => c.default && !c.requires_benchmark).map((c) => c.id),
+    [catalog],
+  );
+
+  const refetch = useMemo(
+    () =>
+      async (nextPeriod: Period, nextMetrics: string[] | null) => {
+        const params = new URLSearchParams();
+        params.set("period", nextPeriod);
+        if (nextMetrics) params.set("metric_ids", nextMetrics.join(","));
+        const r = await fetch(
+          `/api/v1/analyses/${analysisId}/compute?${params.toString()}`,
+          { method: "POST", credentials: "include" },
+        );
+        if (!r.ok) throw new Error(`compute ${r.status}`);
+        const fresh: AnalysisResult = await r.json();
+        setResult(fresh);
+      },
+    [analysisId],
+  );
+
+  // Refetch whenever period or selected metric set changes (after first paint).
+  const initialKey = useMemo(
+    () => `${initial.period}|${Object.keys(initial.metrics).sort().join(",")}`,
+    [initial],
+  );
+  const currentKey = `${period}|${[...selected].sort().join(",")}`;
+
+  useEffect(() => {
+    if (currentKey === initialKey) return; // first paint, server already gave us this
+    startTransition(() => {
+      void refetch(period, metricsCsv ? selected : null);
+    });
+  }, [currentKey, initialKey, period, metricsCsv, selected, refetch]);
+
+  const handlePickPeriod = (p: Period) => {
+    void setPeriod(p === "ALL" ? null : p);
+  };
+
+  const handleToggle = (id: string) => {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    void setMetricsCsv(next.size ? Array.from(next).join(",") : null);
+  };
+
+  const handleResetDefaults = () => {
+    void setMetricsCsv(defaultIds.join(","));
+  };
+
+  const handleClearAll = () => {
+    void setMetricsCsv("");
+  };
+
+  // Derived display data — same math as before, sourced from `result`.
   const growth = result.cumulative_growth;
   const monthly = result.monthly_returns;
 
@@ -197,14 +291,18 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
   const isUp = periodReturn >= 0;
 
   const dts = useMemo(() => {
-    // Prepend a synthetic prior point so the chart starts at $100 anchor.
     if (!growth.length) return [];
     const first = new Date(growth[0]!.period);
-    const prior = new Date(first.getFullYear(), first.getMonth() - 1, 1).toISOString().slice(0, 10);
+    const prior = new Date(first.getFullYear(), first.getMonth() - 1, 1)
+      .toISOString()
+      .slice(0, 10);
     return [prior, ...growth.map((g) => g.period)];
   }, [growth]);
 
-  const values = useMemo(() => (growth.length ? [100, ...growth.map((g) => g.value)] : []), [growth]);
+  const values = useMemo(
+    () => (growth.length ? [100, ...growth.map((g) => g.value)] : []),
+    [growth],
+  );
 
   const sharpe = result.metrics.sharpe?.value ?? null;
   const annVol = result.metrics.ann_vol?.value ?? null;
@@ -221,36 +319,6 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
   const avgLoss = negatives.length
     ? negatives.reduce((s, m) => s + m.value, 0) / negatives.length
     : 0;
-
-  const sharpeSpark = useMemo(() => {
-    if (monthly.length < 7) return [];
-    const win = 6;
-    const out: number[] = [];
-    for (let i = win; i <= monthly.length; i++) {
-      const slice = monthly.slice(i - win, i).map((m) => m.value);
-      const mean = slice.reduce((s, v) => s + v, 0) / win;
-      const sd = Math.sqrt(
-        slice.reduce((s, v) => s + (v - mean) * (v - mean), 0) / (win - 1),
-      );
-      out.push(sd ? (mean * 12) / (sd * Math.sqrt(12)) : 0);
-    }
-    return out;
-  }, [monthly]);
-
-  const volSpark = useMemo(() => {
-    if (monthly.length < 7) return [];
-    const win = 6;
-    const out: number[] = [];
-    for (let i = win; i <= monthly.length; i++) {
-      const slice = monthly.slice(i - win, i).map((m) => m.value);
-      const mean = slice.reduce((s, v) => s + v, 0) / win;
-      const sd = Math.sqrt(
-        slice.reduce((s, v) => s + (v - mean) * (v - mean), 0) / (win - 1),
-      );
-      out.push(sd * Math.sqrt(12));
-    }
-    return out;
-  }, [monthly]);
 
   const fmtPct = (v: number, digits = 2, signed = false): string => {
     const s = (v * 100).toFixed(digits);
@@ -271,8 +339,7 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
                 className="inline-block h-1.5 w-1.5 rounded-full"
                 style={{
                   background: "var(--pos)",
-                  boxShadow:
-                    "0 0 0 4px color-mix(in oklab, var(--pos) 18%, transparent)",
+                  boxShadow: "0 0 0 4px color-mix(in oklab, var(--pos) 18%, transparent)",
                 }}
               />
               <span
@@ -285,7 +352,7 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
                 className="mono"
                 style={{ fontSize: 10.5, letterSpacing: "0.06em", color: "var(--ink-2)" }}
               >
-                · COMPUTED {new Date(result.computed_at).toLocaleDateString()}
+                · {period}
               </span>
             </div>
 
@@ -328,10 +395,34 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
             </div>
           </div>
 
-          <PeriodRail period="ALL" onPick={() => {}} />
+          <PeriodRail period={period} onPick={handlePickPeriod} pending={pending} />
         </div>
 
-        <HeroChart values={values} dates={dts} height={340} isUp={isUp} />
+        <HeroChart
+          values={values}
+          dates={dts}
+          height={340}
+          isUp={isUp}
+          key={`${period}-${result.version_hash}`}
+        />
+      </section>
+
+      {/* METRIC CHIP BAR */}
+      <section style={{ marginTop: -32 }}>
+        <MetricChipBar
+          catalog={catalog}
+          selected={selected}
+          onRemove={handleToggle}
+          trailing={
+            <MetricPalette
+              catalog={catalog}
+              selected={new Set(selected)}
+              onToggle={handleToggle}
+              onResetDefaults={handleResetDefaults}
+              onClearAll={handleClearAll}
+            />
+          }
+        />
       </section>
 
       {/* QUIET STATS */}
@@ -347,15 +438,12 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
           label="SHARPE"
           value={sharpe == null ? "—" : sharpe.toFixed(2)}
           sub="Risk-adjusted return · rf 0%"
-          spark={sharpeSpark}
           isUp={(sharpe ?? 0) >= 1}
         />
         <QuietStat
           label="VOLATILITY"
           value={annVol == null ? "—" : fmtPct(annVol, 1)}
-          sub="Annualized · 6-mo rolling"
-          spark={volSpark}
-          isUp={false}
+          sub="Annualized"
         />
         <QuietStat
           label="MAX DRAWDOWN"
@@ -413,10 +501,7 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
 
         <div>
           <div className="mb-4">
-            <div
-              className="text-base font-medium"
-              style={{ letterSpacing: "-0.012em" }}
-            >
+            <div className="text-base font-medium" style={{ letterSpacing: "-0.012em" }}>
               What changed
             </div>
             <div className="mt-0.5 text-xs" style={{ color: "var(--ink-2)" }}>
@@ -434,7 +519,8 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
               {
                 kind: (sharpe ?? 0) >= 1 ? "pos" : "warn",
                 kicker: "SHARPE",
-                title: (sharpe ?? 0) >= 1 ? "Risk-adjusted profile holds up" : "Risk-adjusted return below 1.0",
+                title:
+                  (sharpe ?? 0) >= 1 ? "Risk-adjusted profile holds up" : "Risk-adjusted return below 1.0",
                 body:
                   sharpe == null
                     ? "Insufficient data to compute Sharpe."
@@ -444,9 +530,7 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
                 kind: maxDD != null && maxDD <= -0.1 ? "neg" : "info",
                 kicker: "DRAWDOWN",
                 title:
-                  maxDD != null && maxDD <= -0.1
-                    ? "Material drawdown in the period"
-                    : "No material drawdown",
+                  maxDD != null && maxDD <= -0.1 ? "Material drawdown in the period" : "No material drawdown",
                 body:
                   maxDD == null
                     ? "Drawdown not computed."
@@ -476,9 +560,7 @@ export function AnalysisOverview({ result }: { result: AnalysisResult }) {
           { label: "RISK-FREE", value: "0.00%", sub: "annualized · editable" },
           {
             label: "LATEST",
-            value: monthly.length
-              ? fmtPct(monthly[monthly.length - 1]!.value, 2, true)
-              : "—",
+            value: monthly.length ? fmtPct(monthly[monthly.length - 1]!.value, 2, true) : "—",
             sub: monthly.length ? fmtMonthYear(monthly[monthly.length - 1]!.period) : "",
           },
         ].map((f) => (

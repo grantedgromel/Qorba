@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Onest, JetBrains_Mono, Instrument_Serif } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import "./globals.css";
 
 const onest = Onest({
@@ -33,7 +34,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       data-theme="dark"
       className={`${onest.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}
     >
-      <body className="min-h-screen bg-bg text-ink antialiased">{children}</body>
+      <body className="min-h-screen bg-bg text-ink antialiased">
+        <NuqsAdapter>{children}</NuqsAdapter>
+      </body>
     </html>
   );
 }

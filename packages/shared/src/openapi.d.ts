@@ -400,8 +400,31 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Compute */
+        /**
+         * Compute
+         * @description Compute the analysis for a given period and (optionally) metric override.
+         *
+         *     `metric_ids` is a comma-separated override; if absent, the analysis's
+         *     saved selection is used.
+         */
         post: operations["compute_api_v1_analyses__analysis_id__compute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/metrics/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["catalog_api_v1_metrics_catalog_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -488,6 +511,11 @@ export interface components {
              * Format: date
              */
             last_observation: string;
+            /**
+             * Period
+             * @enum {string}
+             */
+            period: "3M" | "6M" | "YTD" | "1Y" | "3Y" | "5Y" | "ALL";
             /**
              * Computed At
              * Format: date-time
@@ -716,6 +744,24 @@ export interface components {
             email: string;
             /** Password */
             password: string;
+        };
+        /** MetricCatalog */
+        MetricCatalog: {
+            /** Items */
+            items: components["schemas"]["MetricCatalogEntry"][];
+        };
+        /** MetricCatalogEntry */
+        MetricCatalogEntry: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Group */
+            group: string;
+            /** Default */
+            default: boolean;
+            /** Requires Benchmark */
+            requires_benchmark: boolean;
         };
         /** MetricSelection */
         MetricSelection: {
@@ -1600,7 +1646,10 @@ export interface operations {
     };
     compute_api_v1_analyses__analysis_id__compute_post: {
         parameters: {
-            query?: never;
+            query?: {
+                period?: "3M" | "6M" | "YTD" | "1Y" | "3Y" | "5Y" | "ALL";
+                metric_ids?: string | null;
+            };
             header?: never;
             path: {
                 analysis_id: string;
@@ -1618,6 +1667,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnalysisResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_api_v1_metrics_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                qorba_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricCatalog"];
                 };
             };
             /** @description Validation Error */
